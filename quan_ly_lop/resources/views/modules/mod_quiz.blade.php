@@ -94,7 +94,7 @@
 
                 const startTimeStr = data.start_time;
                 let endTimeStr = data.end_time;
-                console.log(startTimeStr,endTimeStr);
+                console.log(startTimeStr, endTimeStr);
                 // Chuyển đổi thành chuỗi ISO 8601 (thay dấu cách thành T)
                 const startTimeISO = startTimeStr.replace(' ', 'T');
                 endTimeStr = endTimeStr.replace(' ', 'T');
@@ -107,7 +107,7 @@
                 // Nếu không phải bài thi cùng thời gian, cộng thêm 30 ngày
                 if (!isSimultaneous) {
                     endTime += 30 * 24 * 60 * 60 * 1000; // Thêm 30 ngày
-}
+                }
 
                 // Kiểm tra và in ra thời gian để debug
                 console.log('Start time (timestamp):', startTime);
@@ -148,19 +148,18 @@
                                 answer_content: selected ? selected.value : "Chưa trả lời"
                             };
                         });
+                        const autoForm = new FormData();
+                        autoForm.append('student_id', studentId);
+                        if (data.exam_id) autoForm.append('exam_id', data.exam_id);
+                        if (data.assignment_id) autoForm.append('assignment_id', data.assignment_id);
+                        autoForm.append('answers', JSON.stringify(answers));
 
                         const response = await fetch('/api/student/submit-answers', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
                                 'Accept': 'application/json',
                             },
-                            body: JSON.stringify({
-                                student_id: studentId,
-                                exam_id: data.exam_id || null,
-                                assignment_id: data.assignment_id || null,
-                                answers
-                            })
+                            body: autoForm
                         });
 
                         if (response.ok) {
@@ -207,13 +206,13 @@
                     const questionHtml = `
                         <p><strong>Câu ${index + 1}:</strong> ${q.content}</p>
                         ${q.choices.map((choice, i) => `
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="answers[${q.question_id}]" value="${choice}" id="q${q.question_id}_${i}">
-                                <label class="form-check-label" for="q${q.question_id}_${i}">
-                                    ${choice}
-                                </label>
-                            </div>
-                        `).join('')}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="answers[${q.question_id}]" value="${choice}" id="q${q.question_id}_${i}">
+                                        <label class="form-check-label" for="q${q.question_id}_${i}">
+                                            ${choice}
+                                        </label>
+                                    </div>
+                                `).join('')}
                     `;
 
                     wrapper.innerHTML = questionHtml;
@@ -246,19 +245,20 @@
 
                     if (hasUnanswered) return;
 
+                    const submitData = new FormData();
+                    submitData.append('student_id', studentId);
+                    if (data.exam_id) submitData.append('exam_id', data.exam_id);
+                    if (data.assignment_id) submitData.append('assignment_id', data.assignment_id);
+                    submitData.append('answers', JSON.stringify(
+                        answers)); // chuyển answers thành chuỗi JSON
+
                     // Gửi yêu cầu nộp bài
                     const response = await fetch('/api/student/submit-answers', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'Accept': 'application/json',
                         },
-                        body: JSON.stringify({
-                            student_id: studentId,
-                            exam_id: data.exam_id || null,
-                            assignment_id: data.assignment_id || null,
-                            answers
-                        })
+                        body: submitData
                     });
 
                     const responseText = await response.text();
