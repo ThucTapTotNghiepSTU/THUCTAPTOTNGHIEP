@@ -105,6 +105,7 @@ Route::prefix('list-questions')->group(function () {
     Route::put('/update/{id}', [ListQuestionController::class, 'update']);
     Route::delete('/delete/{id}', [ListQuestionController::class, 'destroy']);
     Route::get('/{lecturer_id}', [ListQuestionController::class, 'getAllListQuestionsWithLecturer']);
+    Route::get('/topics/{course_id}', [ListQuestionController::class, 'getTopicsByCourse']);
 });
 
 // API cho Options
@@ -144,6 +145,7 @@ Route::prefix('sub-lists')->group(function () {
     Route::get('/getById/{id}', [SubListController::class, 'show']);
     Route::put('/update/{id}', [SubListController::class, 'update']);
     Route::delete('/delete/{id}', [SubListController::class, 'destroy']);
+    Route::get('/available-questions/{listQuestionId}', [SubListController::class, 'getAvailableQuestions']);
 });
 
 // API cho SubListQuestion
@@ -223,7 +225,7 @@ Route::prefix('lecturer-student')->group(function () {
 
     //  // Lấy bài kiểm tra theo giảng viên
     //  Route::get('/exam/{lecturer_id}', [LecturerAssignmentController::class, 'getExams']);
-
+    ;
     // Lấy danh sách bài tập theo giảng viên
     Route::get('/assignments', [LecturerAssignmentController::class, 'getAssignments']);
 
@@ -240,6 +242,7 @@ Route::prefix('lecturer-student')->group(function () {
 
     // Lấy thống kê nộp bài
     Route::get('/submission-stats', [LecturerAssignmentController::class, 'getSubmissionStats']);
+
 });
 
 

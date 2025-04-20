@@ -18,7 +18,6 @@ class SubList extends Model
         'sub_list_id',
         'title',
         'isShuffle',
-        'list_question_id',
     ];
 
     public $timestamps = true;
@@ -42,6 +41,22 @@ class SubList extends Model
     public function subListQuestions()
     {
         return $this->hasMany(SubListQuestion::class, 'sub_list_id', 'sub_list_id');
+    }
+    public function getListQuestionIdAttribute()
+    {
+        $listQuestionIds = $this->questions()
+            ->pluck('list_question_id')
+            ->unique();
+
+        //nếu không có câu hỏi
+        if ($listQuestionIds->isEmpty()) {
+            return null;
+        }
+        if ($listQuestionIds->count() > 1) {
+            throw new \Exception('Lỗi ngoại lệ! Các mã đề hiện tại thuộc về nhiều hơn 1 bộ câu hỏi');
+        }
+        //nếu có thì sẽ trả về giá trị listquestion đầu tiên vì mặc định chỉ có 1 list question liên quan đến mã đề này.
+        return $listQuestionIds->first();
     }
 
     public function questions()

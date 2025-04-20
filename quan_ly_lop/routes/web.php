@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LecturerDashboardController;
 use App\Http\Controllers\LecturerStudentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SubListController;
+use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\MyClassController;
@@ -136,11 +138,12 @@ Route::middleware('auth:lecturer')->group(function () {
         return view('lecturerViews.tai_khoan');
     })->name('accountLecturer');
     Route::put('/updateInfo/{id}', [LecturerController::class, 'update'])->name('updateInfo');
+        //lấy danh sách câu hỏi khả dụng trong list question
+    Route::get('/available-questions/{listQuestionId}', [SubListController::class, 'getAvailableQuestions']);
 });
 
 // ========== ROUTE PHỤ: DÙNG NỘI BỘ ==========
 Route::get('/submissions/list/{type}/{target_id}', [StudentAssignmentController::class, 'listSubmissions'])->name('submissions.list');
-
 Route::prefix('lecturer')->group(function () {
     Route::get('/dashboard', [LecturerDashboardController::class, 'index'])->name('lecturer.dashboard');
     Route::get('/exams/{examId}', [LecturerDashboardController::class, 'examDetail'])->name('lecturer.exam.detail');

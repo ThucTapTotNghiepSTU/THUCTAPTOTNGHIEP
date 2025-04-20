@@ -19,13 +19,14 @@
                             <div class="mb-3">
                                 <label for="number_of_questions" class="form-label">Số lượng câu hỏi</label>
                                 <input type="number" class="form-control" id="number_of_questions" required min="1">
+                                <small id="available-questions" class="form-text text-muted"></small>
                             </div>
                             <div class="mb-3">
                                 <label for="question_type" class="form-label">Loại câu hỏi</label>
                                 <select id="question_type">
                                     <option value="">Tất cả</option>
-                                    <option value="multiple_choice">Trắc nghiệm</option>
-                                    <option value="short_answer">Tự luận</option>
+                                    <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                    <option value="Tự luận">Tự luận</option>
                                 </select>
                             </div>
                             <div class="form-check mb-3">
@@ -140,7 +141,51 @@
         document.addEventListener("DOMContentLoaded", function () {
             listQuestionId = "{{ $list_question_id }}";
             localStorage.setItem('current_list_question_id', listQuestionId);
+            const questionTypeSelect = document.getElementById('question_type');
+            const availableQuestionsText = document.getElementById('available-questions');
             fetchSubLists(listQuestionId);
+            // Khôi phục trạng thái accordion
+            const openAccordion = localStorage.getItem('openAccordion');
+            if (openAccordion) {
+                const accordion = document.querySelector(`#${openAccordion}`);
+                if (accordion) {
+                    accordion.classList.add('show');
+                    accordion.previousElementSibling.querySelector('.accordion-button').classList.remove('collapsed');
+                }
+            }
+            function updateAvailableQuestions() {
+                fetch(`http://127.0.0.1:8000/api/sub-lists/available-questions/${listQuestionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const selectedType = questionTypeSelect.value;
+                        let availableCount;
+                        if (selectedType === '') {
+                            availableCount = data.all;
+                        } else if (selectedType === 'Trắc nghiệm') {
+                            availableCount = data.multiple_choice;
+                        } else {
+                            availableCount = data.short_answer;
+                        }
+                        availableQuestionsText.textContent = `Số câu hỏi khả dụng: ${availableCount}`;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching available questions:', error);
+                        availableQuestionsText.textContent = 'Lỗi khi tải số câu hỏi khả dụng';
+                    });
+            }
+
+            // Cập nhật số lượng khi mở modal và khi thay đổi loại câu hỏi
+            updateAvailableQuestions();
+            questionTypeSelect.addEventListener('change', updateAvailableQuestions);
+            // Lưu trạng thái khi accordion được mở
+            document.querySelectorAll('.accordion-collapse').forEach(collapse => {
+                collapse.addEventListener('show.bs.collapse', function () {
+                    localStorage.setItem('openAccordion', collapse.id);
+                });
+                collapse.addEventListener('hide.bs.collapse', function () {
+                    localStorage.removeItem('openAccordion');
+                });
+            });
             fetch(`http://127.0.0.1:8000/api/list-questions/detail/${listQuestionId}`)
                 .then(response => response.json())
                 .then(result => {
@@ -148,7 +193,7 @@
 
                     if (!result.data) {
                         questionList.innerHTML = `
-                        <div class="alert alert-warning">Không tìm thấy danh sách câu hỏi!</div>`;
+                                                                                                                        <div class="alert alert-warning">Không tìm thấy danh sách câu hỏi!</div>`;
                         return;
                     }
 
@@ -157,33 +202,33 @@
 
                     if (!questions || questions.length === 0) {
                         questionList.innerHTML = `
-                                                                        <div class="alert alert-warning">Chưa có câu hỏi nào.</div>`;
+                                <div class="alert alert-warning">Chưa có câu hỏi nào.</div>`;
                         return;
                     }
 
                     questions.forEach((question, index) => {
                         const html = `
-                                                                            <div class="accordion-item mb-2" id="question-${question.question_id}">
-                                                                                <h2 class="accordion-header" id="heading${index}">
-                                                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                                                                        data-bs-target="#collapse${index}">
-                                                                                        Câu hỏi: ${question.title}
-                                                                                    </button>
-                                                                                </h2>
-                                                                                <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#questionList">
-                                                                                    <div class="accordion-body">
-                                                                                        <p><strong>Nội dung:</strong> ${question.content}</p>
-                                                                                        <p><strong>Loại:</strong> ${question.type}</p>
-                                                                                        <p><strong>Đáp án đúng:</strong> ${question.correct_answer ?? 'Không có'}</p>
-                                                                                        ${renderOptions(question.options)}
-                                                                                        <div class="d-flex gap-2 mt-3">
-                                                                                            <button class="btn btn-warning btn-sm edit-button" data-question-id="${question.question_id}">Sửa</button>
-                                                                                            <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${question.question_id}')">Xóa bỏ</button>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        `;
+                            <div class="accordion-item mb-2" id="question-${question.question_id}">
+                                <h2 class="accordion-header" id="heading${index}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse${index}">
+                                        Câu hỏi: ${question.title}
+                                    </button>
+                                </h2>
+                                <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#questionList">
+                                    <div class="accordion-body">
+                                        <p><strong>Nội dung:</strong> ${question.content}</p>
+                                        <p><strong>Loại:</strong> ${question.type}</p>
+                                        <p><strong>Đáp án đúng:</strong> ${question.correct_answer ?? 'Không có'}</p>
+                                        ${renderOptions(question.options)}
+                                        <div class="d-flex gap-2 mt-3">
+                                            <button class="btn btn-warning btn-sm edit-button" data-question-id="${question.question_id}">Sửa</button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${question.question_id}')">Xóa bỏ</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
                         questionList.insertAdjacentHTML('beforeend', html);
                     });
 
@@ -200,20 +245,20 @@
                 .catch(error => {
                     console.error('Lỗi khi fetch dữ liệu:', error);
                     document.getElementById("questionList").innerHTML = `
-                                                                    <div class="alert alert-danger">Lỗi khi tải dữ liệu.</div>`;
+                                                                                        <div class="alert alert-danger">Lỗi khi tải dữ liệu.</div>`;
                 });
 
             function renderOptions(options) {
                 if (!options || options.length === 0) return '';
                 return `
-                                                                <p><strong>Các lựa chọn:</strong></p>
-                                                                <ul>
-                                                                    <li>${options[0]}</li>
-                                                                    <li>${options[1]}</li>
-                                                                    <li>${options[2]}</li>
-                                                                    <li>${options[3]}</li>
-                                                                </ul>
-                                                            `;
+                                                                                    <p><strong>Các lựa chọn:</strong></p>
+                                                                                    <ul>
+                                                                                        <li>${options[0]}</li>
+                                                                                        <li>${options[1]}</li>
+                                                                                        <li>${options[2]}</li>
+                                                                                        <li>${options[3]}</li>
+                                                                                    </ul>
+                                                                                                    `;
             }
 
             function editQuestion(questionId) {
@@ -250,39 +295,8 @@
                 // Mở modal
                 new bootstrap.Modal(document.getElementById('editQuestionModal')).show();
             }
-            document.getElementById('editQuestionForm').addEventListener('submit', function (e) {
-                const questionId = document.getElementById('edit-question-id').value;
-                const data = {
-                    title: document.getElementById('edit-title').value,
-                    content: document.getElementById('edit-content').value,
-                    type: document.getElementById('edit-type').value,
-                    correct_answer: document.getElementById('edit-correct-answer').value,
-                };
-                fetch(`http://127.0.0.1:8000/api/questions/update/${questionId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Cập nhật thất bại');
-                        return response.json();
-                    })
-                    .then(result => {
-                        alert("Cập nhật thành công!");
-                        location.reload();
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        alert("Có lỗi khi cập nhật câu hỏi!");
-                    });
-            });
             function deleteQuestion(questionId) {
                 if (!confirm("Bạn có chắc chắn muốn xoá câu hỏi này không?")) return;
-
                 fetch(`http://127.0.0.1:8000/api/questions/${questionId}`, {
                     method: "DELETE",
                     headers: {
@@ -309,7 +323,7 @@
             correct_answer: document.getElementById('edit-correct-answer').value,
         };
         document.getElementById('editQuestionForm').addEventListener('submit', function (e) {
-            // Lấy dữ liệu từ form
+            e.preventDefault();
             const questionId = document.getElementById('edit-question-id').value;
             const data = {
                 title: document.getElementById('edit-title').value,
@@ -318,9 +332,6 @@
                 correct_answer: document.getElementById('edit-correct-answer').value,
             };
 
-            console.log(data);  // In ra dữ liệu để kiểm tra
-
-            // Gửi yêu cầu PUT tới API để cập nhật câu hỏi
             fetch(`http://127.0.0.1:8000/api/questions/update/${questionId}`, {
                 method: 'PUT',
                 headers: {
@@ -335,12 +346,18 @@
                     return response.json();
                 })
                 .then(result => {
-                    alert("Cập nhật thành công!");  // Thông báo thành công
-                    location.reload();  // Reload trang để cập nhật thay đổi
+                    alert("Cập nhật thành công!");
+                    // Cập nhật DOM thay vì tải lại trang
+                    const card = document.getElementById(`question-${questionId}`);
+                    card.querySelector('.accordion-button').textContent = `Câu hỏi: ${data.title}`;
+                    card.querySelector('p:nth-of-type(1)').textContent = `Nội dung: ${data.content}`;
+                    card.querySelector('p:nth-of-type(2)').textContent = `Loại: ${data.type}`;
+                    card.querySelector('p:nth-of-type(3)').textContent = `Đáp án đúng: ${data.correct_answer || 'Không có'}`;
+                    bootstrap.Modal.getInstance(document.getElementById('editQuestionModal')).hide();
                 })
                 .catch(error => {
                     console.error(error);
-                    alert("Có lỗi khi cập nhật câu hỏi!");  // Thông báo lỗi
+                    alert("Có lỗi khi cập nhật câu hỏi!");
                 });
         });
 
@@ -354,11 +371,11 @@
 
             const title = document.getElementById('title').value;
             const number_of_questions = parseInt(document.getElementById('number_of_questions').value);
-            const question_type = document.getElementById('question_type').value || null;
+            let question_type = document.getElementById('question_type').value;
             if (question_type === "") question_type = null;
             const isShuffle = document.getElementById('isShuffle').checked;
             const list_question_id = listQuestionId;
-            console.log(list_question_id);
+
             if (!list_question_id) {
                 alert("Không tìm thấy ID bộ đề tổng.");
                 return;
@@ -386,12 +403,11 @@
                     document.getElementById('createSublistForm').reset();
                     const modal = bootstrap.Modal.getInstance(document.getElementById('createSublistModal'));
                     modal.hide();
-                    // reload lại danh sách sublist nếu cần
+                    fetchSubLists(list_question_id);
                 } else {
                     console.error(data);
                     alert("❌ Lỗi tạo mã đề: " + (data.message || 'Có lỗi xảy ra.'));
                 }
-
             } catch (err) {
                 console.error(err);
                 alert("❌ Lỗi kết nối đến server.");
@@ -399,76 +415,102 @@
         });
 
         function fetchSubLists(listQuestionId) {
-            console.log(`http://127.0.0.1:8000/api/sub-lists/getAll/${listQuestionId}`);
-
+            console.log('Fetching SubLists for listQuestionId:', listQuestionId);
             fetch(`http://127.0.0.1:8000/api/sub-lists/getAll/${listQuestionId}`)
                 .then(response => {
-                    if (response.headers.get('Content-Type')?.includes('text/html')) {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    if (!response.headers.get('Content-Type')?.includes('application/json')) {
                         return response.text().then(text => {
-                            throw new Error("Received HTML instead of JSON: " + text);
+                            throw new Error('Response is not JSON: ' + text);
                         });
                     }
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Data từ API:', data);
                     const sublistContainer = document.getElementById('sublistContainer');
                     sublistContainer.innerHTML = '';
 
-                    if (data.message) {
-                        sublistContainer.innerHTML = `<div class="alert alert-info">${data.message}</div>`;
+                    if (!data.sub_list || !Array.isArray(data.sub_list)) {
+                        sublistContainer.innerHTML = `<div class="alert alert-info">Không có mã đề nào để hiển thị.</div>`;
                         return;
                     }
-                    console.log('Data nhận được từ API:', data);
 
-                    data.forEach(sublist => {
-                        const col = document.createElement('div');
-                        col.className = 'col-md-4 col-sm-6';
+                    if (data.sub_list.length === 0) {
+                        sublistContainer.innerHTML = `<div class="alert alert-info">Không có mã đề nào cho bộ câu hỏi này.</div>`;
+                        return;
+                    }
 
-                        const card = document.createElement('div');
-                        card.className = 'card h-100 shadow-sm border-0 sublist-card transition-hover';
-                        card.style.cursor = 'pointer';
+                    data.sub_list.forEach(sublist => {
+                        try {
+                            console.log('SubList:', sublist);
+                            const col = document.createElement('div');
+                            col.className = 'col-md-4 col-sm-6';
 
-                        card.innerHTML = `
-                                    <div class="card-body">
-                                        <h5 class="card-title">${sublist.title}</h5>
-                                        <p class="card-text mb-1"><strong>ID:</strong> ${sublist.sub_list_id}</p>
-                                        <p class="card-text"><strong>Trộn câu:</strong> ${sublist.is_shuffle ? 'Có' : 'Không'}</p>
-                                    </div>
-                                    <div class="card-footer bg-transparent border-0 text-end">
-                                        <small class="text-muted">Tạo lúc: ${new Date(sublist.created_at).toLocaleString()}</small>
-                                    </div>
-                                `;
+                            const card = document.createElement('div');
+                            card.className = 'card h-100 shadow-sm border-0 sublist-card transition-hover';
+                            card.style.cursor = 'pointer';
 
-                        col.appendChild(card);
-                        sublistContainer.appendChild(col);
+                            const title = sublist.title || 'Không có tiêu đề';
+                            const subListId = sublist.sub_list_id || 'N/A';
+                            const isShuffle = sublist.is_shuffle !== undefined ? (sublist.is_shuffle ? 'Có' : 'Không') : 'N/A';
+                            let createdAt;
+                            try {
+                                createdAt = sublist.created_at && typeof sublist.created_at === 'string' && !isNaN(new Date(sublist.created_at))
+                                    ? new Date(sublist.created_at).toLocaleString()
+                                    : 'N/A';
+                            } catch (error) {
+                                console.error('Error parsing created_at for sublist:', sublist, error);
+                                createdAt = 'N/A';
+                            }
+
+                            card.innerHTML = `
+                            <div class="card-body">
+                                <h5 class="card-title">${escapeHtml(title)}</h5>
+                                <p class="card-text mb-1"><strong>ID:</strong> ${escapeHtml(subListId)}</p>
+                                <p class="card-text"><strong>Trộn câu:</strong> ${isShuffle}</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 text-end">
+                                <small class="text-muted">Tạo lúc: ${createdAt}</small>
+                            </div>
+                        `;
+
+                            col.appendChild(card);
+                            sublistContainer.appendChild(col);
+                        } catch (error) {
+                            console.error('Error rendering sublist:', sublist, error);
+                        }
                     });
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Error fetching SubLists:', error);
                     const sublistContainer = document.getElementById('sublistContainer');
-                    sublistContainer.innerHTML = `<div class="alert alert-danger">Lỗi khi tải dữ liệu: ${error.message}</div>`;
+                    sublistContainer.innerHTML = `<div class="alert alert-danger">Lỗi khi tải danh sách mã đề: ${error.message}</div>`;
                 });
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&")
+                .replace(/</g, "<")
+                .replace(/>/g, ">")
+                .replace(/'/g, "'");
         }
 
     </script>
     <style>
-        .sublist-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .sublist-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-
-        .custom-card {
-            background-color: #343a40;
-            /* Màu nền tối */
-            color: #f8f9fa;
-            /* Màu chữ sáng */
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        .sublist-card,
+        .card-body,
+        .card-title,
+        .card-text {
+            color: black !important;
+            background-color: white !important;
+            display: block !important;
+            opacity: 1 !important;
+            font-size: 16px !important;
         }
 
         .custom-card:hover {

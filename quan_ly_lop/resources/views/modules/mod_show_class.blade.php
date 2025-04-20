@@ -19,6 +19,7 @@
                 <div id="assignment-container"></div>
             </div>
         </div>
+        
     </div>
 
     @auth

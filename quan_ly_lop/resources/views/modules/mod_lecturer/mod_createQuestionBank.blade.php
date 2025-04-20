@@ -310,7 +310,6 @@
         right: 0;
         height: 6px;
         background-color: #007bff;
-        /* Màu mặc định */
         border-top-left-radius: 0.5rem;
         border-top-right-radius: 0.5rem;
         transition: background-color 0.3s ease;
@@ -333,16 +332,13 @@
     /* Hover đồng bộ cả 2 */
     .card-hover:hover::before {
         background-color: #28a745;
-        /* Dải màu đổi */
     }
 
     .card-hover:hover::after {
         opacity: 1;
         transform: translateY(0);
         color: #28a745;
-        /* Mũi tên đổi màu luôn cho đồng bộ */
     }
-
 
     .card-text strong {
         color: #495057;
@@ -362,6 +358,9 @@
         width: 250px;
     }
 </style>
+<style>
+    /* Giữ nguyên CSS */
+</style>
 <div class="container py-4">
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -373,20 +372,28 @@
     <div class="row justify-content-start">
         <div class="col-md-10">
             @auth
-                <form id="courseForm" action="/api/questions/create" method="POST">
-                    @csrf
-                    <div class="d-flex flex-column container-sm">
-                        <select name="course_id_createQuestion" id="courseSelect" class="form-select">
-                            <option selected disabled>Bắt đầu tạo bộ câu hỏi với môn học</option>
+                <form id="createListQuestionForm" novalidate>
+                    <div class="mb-3">
+                        <label for="course_id" class="form-label">Môn học</label>
+                        <select class="form-select" id="course_id" name="course_id" required>
+                            <option value="">Chọn môn học</option>
                             @foreach($courses as $course)
                                 <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
                             @endforeach
                         </select>
-                        <button type="submit" id="startCreateQuestion" class="btn btn-primary mt-3 " disabled>
-                            Bắt đầu tạo bộ câu hỏi
-                        </button>
                     </div>
 
+                    <div class="mb-3" id="topic_container" style="display: none;">
+                        <label for="topic" class="form-label">Chủ đề</label>
+                        <select class="form-select" id="topic_select" name="topic_select">
+                            <option value="">Chọn chủ đề</option>
+                            <option value="new">Nhập chủ đề mới</option>
+                        </select>
+                        <input type="text" class="form-control mt-2" id="topic_input" name="topic" style="display: none;"
+                            placeholder="Nhập chủ đề mới">
+                    </div>
+
+                    <button type="submit" id="startCreateQuestion" class="btn btn-primary">Tạo bộ câu hỏi</button>
                 </form>
 
                 <div id="temporaryQuestionsSection" class="mb-4" style="display: none;">
@@ -458,7 +465,7 @@
 
     <div class="container mt-3">
         <div class="flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-4 ">Danh sách câu hỏi</h3>
+            <h3 class="mb-4">Danh sách bộ câu hỏi</h3>
             <select name="course_id" id="courseFilter" class="form-select">
                 <option value="all" selected>Tất cả</option>
                 @foreach($courses as $course)
@@ -476,28 +483,97 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const startButton = document.getElementById("startCreateQuestion");
         const temporaryQuestionsList = document.getElementById("temporaryQuestionsList");
         const saveQuestionButton = document.getElementById("saveQuestion");
         const finishCreatingButton = document.getElementById("finishCreating");
         const questionForm = document.querySelector('.card.shadow-lg');
         const temporaryQuestionsSection = document.getElementById('temporaryQuestionsSection');
         let optionCount = 1;
-        const courseId = 'bb18b2e3-b400-44f9-ae2a-d72853575eb3';
         const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
-        const filterSelect = document.getElementById('courseFilter');
-        const courseSelect = document.getElementById("courseFilter");
-        const courseToCreateQuestion = document.getElementById("courseSelect");
         const courseFilter = document.getElementById("courseFilter");
-        const container = document.getElementById("list-question-container");
+        const courseToCreateQuestion = document.getElementById("course_id");
+        const submitBtn = document.getElementById("startCreateQuestion");
+
         // Kiểm tra xem đã có list_question_id chưa
         const existingListQuestionId = localStorage.getItem("list_question_id");
-        const submitBtn = document.getElementById("startCreateQuestion");
         if (existingListQuestionId) {
             questionForm.style.display = 'block';
             temporaryQuestionsSection.style.display = 'block';
             renderTemporaryQuestions();
         }
+
+        // Disable the submit button initially
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
+
+        // Khi chọn môn học, lấy danh sách topic tương ứng
+        // Khi chọn môn học, lấy danh sách topic tương ứng
+        if (courseToCreateQuestion) {
+            courseToCreateQuestion.addEventListener('change', function () {
+                const courseId = this.value;
+                const topicContainer = document.getElementById('topic_container');
+                const topicSelect = document.getElementById('topic_select');
+                const topicInput = document.getElementById('topic_input');
+
+                if (courseId) {
+                    topicContainer.style.display = 'block';
+                    fetch(`/api/list-questions/topics/${courseId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Reset topic select
+                            topicSelect.innerHTML = '<option value="">Chọn chủ đề</option>';
+                            if (data.topics && data.topics.length > 0) {
+                                data.topics.forEach(topic => {
+                                    const option = document.createElement('option');
+                                    option.value = topic;
+                                    option.textContent = topic;
+                                    topicSelect.appendChild(option);
+                                });
+                            }
+                            // Thêm tùy chọn "Nhập chủ đề mới" vào cuối
+                            const newOption = document.createElement('option');
+                            newOption.value = 'new';
+                            newOption.textContent = 'Nhập chủ đề mới';
+                            topicSelect.appendChild(newOption);
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi lấy danh sách topic:', error);
+                            alert('Lỗi khi tải chủ đề. Vui lòng thử lại sau. Chi tiết lỗi: ' + error.message);
+                            topicSelect.innerHTML = '<option value="">Không có chủ đề</option><option value="new">Nhập chủ đề mới</option>';
+                        });
+
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
+                } else {
+                    topicContainer.style.display = 'none';
+                    topicSelect.innerHTML = '<option value="">Chọn chủ đề</option><option value="new">Nhập chủ đề mới</option>';
+                    topicInput.style.display = 'none';
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                    }
+                }
+            });
+        }
+
+        // Xử lý khi người dùng thay đổi lựa chọn trong topic select
+        document.getElementById('topic_select').addEventListener('change', function () {
+            const topicInput = document.getElementById('topic_input');
+            if (this.value === 'new') {
+                topicInput.style.display = 'block';
+                topicInput.focus();
+            } else {
+                topicInput.style.display = 'none';
+                topicInput.value = '';
+            }
+        });
+
         function fetchListQuestions(courseId = "null") {
             let url = `/api/list-questions/${lecturerId}`;
             if (courseId !== "null" && courseId !== "all") {
@@ -518,14 +594,14 @@
                         const lecturerName = item.lecturer?.fullname || "Không rõ";
                         const courseName = item.course?.course_name || "Không rõ";
                         card.innerHTML = `
-                    <div class="card h-100 shadow-sm card-hover position-relative" data-id="${item.list_question_id}">
-                        <div class="card-body">
-                            <p class="card-text"><strong>Môn học:</strong> ${courseName}</p>
-                            <p class="card-text"><strong>Giảng viên:</strong> ${lecturerName}</p>
-                            <p class="card-text"><small class="text-muted">Tạo lúc: ${new Date(item.created_at).toLocaleString()}</small></p>
+                        <div class="card h-100 shadow-sm card-hover position-relative" data-id="${item.list_question_id}">
+                            <div class="card-body">
+                                <p class="card-text"><strong>Môn học:</strong> ${courseName}</p>
+                                <p class="card-text"><strong>Giảng viên:</strong> ${lecturerName}</p>
+                                <p class="card-text"><small class="text-muted">Tạo lúc: ${new Date(item.created_at).toLocaleString()}</small></p>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
                         const cardElement = card.querySelector('.card');
                         cardElement.addEventListener("click", () => {
                             const listQuestionId = cardElement.getAttribute("data-id");
@@ -540,51 +616,54 @@
                         `<p class="text-danger">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>`;
                 });
         }
-        courseFilter.addEventListener("change", function () {
-            const selectedValue = this.value;
-            const courseId = selectedValue === "all" ? "null" : selectedValue;
-            fetchListQuestions(courseId); // chỉ fetch danh sách
-        });
-        //lọc card
-        courseToCreateQuestion.addEventListener("change", function () {
-            if (this.value) {
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
-            }
-        });
-        window.addEventListener("DOMContentLoaded", () => {
-            fetchListQuestions(); // load tất cả môn học khi chưa chọn gì
-        });
-        // Hiển thị câu hỏi đã lưu từ localStorage
+
+        if (courseFilter) {
+            courseFilter.addEventListener("change", function () {
+                const selectedValue = this.value;
+                const courseId = selectedValue === "all" ? "null" : selectedValue;
+                fetchListQuestions(courseId);
+            });
+        }
+
+        fetchListQuestions(); // Load all courses initially
+
         function renderTemporaryQuestions() {
-            const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+            let savedQuestions;
+            try {
+                savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+            } catch (error) {
+                console.error('Error parsing questions from localStorage:', error);
+                savedQuestions = [];
+            }
+
             temporaryQuestionsList.innerHTML = '';
 
             if (savedQuestions.length > 0) {
                 savedQuestions.forEach((question, index) => {
                     const questionDiv = document.createElement('div');
                     questionDiv.classList.add('mb-2');
+
+                    const optionsHtml = question.options && Array.isArray(question.options)
+                        ? `<ul>${question.options.map(option =>
+                            `<li>${option.option_text} ${option.is_correct ? '(Đúng)' : ''}</li>`
+                        ).join('')}</ul>`
+                        : '';
+
                     questionDiv.innerHTML = `
-                        <div>
-                            <strong>${question.title}</strong>
-                            <p>${question.content}</p>
-                            <p><em>Loại câu hỏi: ${question.type}</em></p>
-                            <ul>
-                                ${question.options.map(option =>
-                        `<li>${option.option_text} ${option.is_correct ? '(Đúng)' : ''}</li>`
-                    ).join('')}
-                            </ul>
-                            <button class="btn btn-danger btn-sm delete-question" data-index="${index}">
-                                Xóa câu hỏi
-                            </button>
-                            <hr>
-                        </div>
-                    `;
+                    <div>
+                        <strong>${question.title}</strong>
+                        <p>${question.content}</p>
+                        <p><em>Loại câu hỏi: ${question.type}</em></p>
+                        ${optionsHtml}
+                        <button class="btn btn-danger btn-sm delete-question" data-index="${index}">
+                            Xóa câu hỏi
+                        </button>
+                        <hr>
+                    </div>
+                `;
                     temporaryQuestionsList.appendChild(questionDiv);
                 });
 
-                // Thêm event listeners cho nút xóa
                 document.querySelectorAll('.delete-question').forEach(button => {
                     button.addEventListener('click', function () {
                         const index = parseInt(this.getAttribute('data-index'));
@@ -596,7 +675,6 @@
             }
         }
 
-        // Xóa một câu hỏi tạm thời
         function deleteTemporaryQuestion(index) {
             const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
             savedQuestions.splice(index, 1);
@@ -604,115 +682,98 @@
             renderTemporaryQuestions();
         }
 
-        // Reset form sau khi lưu
         function resetForm() {
             document.getElementById('createQuestionForm').reset();
             document.getElementById('options-container').innerHTML = `
-                <div class="d-flex align-items-center mb-2 option">
-                    <input type="text" name="options[0][option_text]" class="form-control me-2"
-                        placeholder="Nhập đáp án 1" required>
-                    <input type="radio" name="correct_answer" value="0"
-                        class="form-check-input">
-                    <span class="ms-2">Đáp án đúng</span>
-                </div>
-            `;
+            <div class="d-flex align-items-center mb-2 option">
+                <input type="text" name="options[0][option_text]" class="form-control me-2"
+                    placeholder="Nhập đáp án 1" required>
+                <input type="radio" name="correct_answer" value="0"
+                    class="form-check-input">
+                <span class="ms-2">Đáp án đúng</span>
+            </div>
+        `;
             optionCount = 1;
         }
 
-        // Hiển thị phần đáp án khi loại câu hỏi là "Trắc nghiệm"
         document.getElementById('type').addEventListener('change', function () {
             const optionsSection = document.getElementById('options-section');
             optionsSection.style.display = this.value === 'Trắc nghiệm' ? 'block' : 'none';
         });
 
-        // Thêm lựa chọn mới cho câu hỏi trắc nghiệm - sửa lỗi addOption
         function addOption() {
             const container = document.getElementById('options-container');
             const optionDiv = document.createElement('div');
             optionDiv.classList.add('d-flex', 'align-items-center', 'mb-2', 'option');
             optionDiv.innerHTML = `
-                <input type="text" name="options[${optionCount}][option_text]" class="form-control me-2"
-                    placeholder="Nhập đáp án ${optionCount + 1}" required>
-                <input type="radio" name="correct_answer" value="${optionCount}" class="form-check-input">
-                <span class="ms-2">Đáp án đúng</span>
-            `;
+            <input type="text" name="options[${optionCount}][option_text]" class="form-control me-2"
+                placeholder="Nhập đáp án ${optionCount + 1}" required>
+            <input type="radio" name="correct_answer" value="${optionCount}" class="form-check-input">
+            <span class="ms-2">Đáp án đúng</span>
+        `;
             container.appendChild(optionDiv);
             optionCount++;
         }
 
-        // Gán hàm addOption vào window để có thể gọi từ onclick
         window.addOption = addOption;
 
-        // Khởi động khi nhấn "Bắt đầu tạo câu hỏi"
-        if (startButton) {
-            startButton.addEventListener("click", function (e) {
-                e.preventDefault();
-                console.log("Start button clicked"); // Kiểm tra sự kiện click
+        document.getElementById('createListQuestionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-                const courseId = document.getElementById("courseSelect").value;
-                console.log("Course ID:", courseId); // Kiểm tra course ID
+            const courseId = document.getElementById('course_id').value;
+            const topicSelect = document.getElementById('topic_select');
+            const topicInput = document.getElementById('topic_input');
 
-                if (!courseId) {
-                    alert("Vui lòng chọn môn học trước khi tiếp tục!");
-                    return;
-                }
+            // Lấy giá trị topic
+            let topic;
+            if (topicSelect.value === 'new') {
+                topic = topicInput.value.trim();
+            } else {
+                topic = topicSelect.value;
+            }
 
-                startButton.disabled = true;
-                startButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+            if (!courseId || !topic) {
+                alert('Vui lòng chọn môn học và chủ đề!');
+                return;
+            }
 
-                console.log("Calling API endpoint: /api/list-questions");
-                console.log("Request body:", { course_id: courseId, lecturer_id: lecturerId });
-
-                console.log("CSRF Token:", csrfToken);
-
-                fetch("/api/list-questions/create", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": csrfToken
-                    },
-                    body: JSON.stringify({ course_id: courseId, lecturer_id: lecturerId })
+            fetch('/api/list-questions/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    topic: topic,
+                    lecturer_id: lecturerId
                 })
-                    .then(response => {
-                        console.log("Response status:", response.status);
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let message = 'Tạo bộ câu hỏi thành công!';
+                        if (data.new_topic_created) {
+                            message += ' Chủ đề mới đã được tạo: ' + topic;
                         }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Response data:", data);
-                        if (data.id) {
-                            console.log("Saving list_question_id to localStorage:", data.id);
-                            localStorage.setItem("list_question_id", data.id);
-                            localStorage.setItem('questions', JSON.stringify([]));
-                            alert("Danh sách câu hỏi đã được tạo!");
-                            questionForm.style.display = 'block';
-                            temporaryQuestionsSection.style.display = 'block';
-                            renderTemporaryQuestions();
-                        } else {
-                            console.error("No id in response data:", data);
-                            alert(data.message || "Có lỗi xảy ra, vui lòng thử lại!");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error calling API:", error);
-                        alert("Có lỗi xảy ra: " + error.message);
-                    })
-                    .finally(() => {
-                        startButton.disabled = false;
-                        startButton.innerHTML = 'Bắt đầu tạo bộ câu hỏi';
-                    });
-            });
-        } else {
-            console.error("Start button not found"); // Kiểm tra nếu không tìm thấy nút
-        }
+                        alert(message);
+                        localStorage.setItem('list_question_id', data.list_question_id);
+                        questionForm.style.display = 'block';
+                        temporaryQuestionsSection.style.display = 'block';
+                        renderTemporaryQuestions();
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tạo bộ câu hỏi:', error);
+                    alert('Đã xảy ra lỗi khi tạo bộ câu hỏi!');
+                });
+        });
 
-        // Lưu câu hỏi tạm thời vào localStorage khi nhấn "Tạo Thêm Câu Hỏi"
         if (saveQuestionButton) {
             saveQuestionButton.addEventListener('click', function () {
-                console.log("Save button clicked"); // Kiểm tra sự kiện click
-
                 const listQuestionId = localStorage.getItem("list_question_id");
                 if (!listQuestionId) {
                     alert("Vui lòng bắt đầu tạo bộ câu hỏi trước!");
@@ -721,12 +782,13 @@
 
                 const title = document.getElementById('title').value;
                 const content = document.getElementById('content').value;
-                const type = document.getElementById('type').value;
-                console.log("Form data:", { title, content, type }); // Kiểm tra dữ liệu form
+                let type = document.getElementById('type').value;
+
                 if (!title || !content) {
                     alert("Vui lòng nhập đầy đủ tiêu đề và nội dung câu hỏi!");
                     return;
                 }
+
                 const options = [];
                 let hasCorrectAnswer = false;
                 if (type === 'Trắc nghiệm') {
@@ -749,6 +811,7 @@
                         return;
                     }
                 }
+
                 const question = { title, content, type, options };
                 let savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
                 savedQuestions.push(question);
@@ -758,16 +821,12 @@
                 renderTemporaryQuestions();
             });
         } else {
-            console.error("Save button not found"); // Kiểm tra nếu không tìm thấy nút
+            console.error("Save button not found");
         }
 
-        // Hoàn thành và gửi tất cả câu hỏi khi nhấn "Hoàn Thành"
         if (finishCreatingButton) {
             finishCreatingButton.addEventListener('click', function () {
-                console.log("Finish button clicked"); // Kiểm tra sự kiện click
                 let savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
-                console.log("Saved questions:", savedQuestions); // Kiểm tra câu hỏi đã lưu
-
                 if (savedQuestions.length === 0) {
                     alert("Chưa có câu hỏi nào được lưu!");
                     return;
@@ -777,8 +836,34 @@
                     alert("Có lỗi xảy ra! Không tìm thấy danh sách câu hỏi.");
                     return;
                 }
+
+                // Kiểm tra dữ liệu trước khi gửi
+                let isValid = true;
+                savedQuestions.forEach((question, index) => {
+                    if (!question.title || !question.content || !question.type) {
+                        alert(`Câu hỏi ${index + 1} thiếu thông tin bắt buộc (tiêu đề, nội dung hoặc loại câu hỏi)!`);
+                        isValid = false;
+                    }
+                    if (question.type === 'Trắc nghiệm') {
+                        if (!question.options || question.options.length < 2) {
+                            alert(`Câu hỏi ${index + 1} cần ít nhất 2 lựa chọn!`);
+                            isValid = false;
+                        } else {
+                            const hasCorrectAnswer = question.options.some(option => option.is_correct);
+                            if (!hasCorrectAnswer) {
+                                alert(`Câu hỏi ${index + 1} cần có ít nhất 1 đáp án đúng!`);
+                                isValid = false;
+                            }
+                        }
+                    }
+                });
+
+                if (!isValid) return;
+
                 finishCreatingButton.disabled = true;
                 finishCreatingButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+
+                // Gửi dữ liệu lên server
                 fetch('/api/questions/batch', {
                     method: 'POST',
                     headers: {
@@ -791,14 +876,14 @@
                     })
                 })
                     .then(response => {
-                        console.log("Response status:", response.status); // Kiểm tra status code
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            return response.json().then(err => {
+                                throw new Error(JSON.stringify(err));
+                            });
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log("Response data:", data); // Kiểm tra dữ liệu trả về
                         if (data.success) {
                             localStorage.removeItem('questions');
                             localStorage.removeItem('list_question_id');
@@ -818,11 +903,7 @@
                     });
             });
         } else {
-            console.error("Finish button not found"); // Kiểm tra nếu không tìm thấy nút
+            console.error("Finish button not found");
         }
-        console.log("Start button:", startButton);
-        console.log("Save button:", saveQuestionButton);
-        console.log("Finish button:", finishCreatingButton);
     });
-
 </script>
