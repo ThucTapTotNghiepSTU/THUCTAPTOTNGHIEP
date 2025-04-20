@@ -98,40 +98,128 @@ class ListQuestionController extends Controller
         }
     }
 
-
-    public function store(Request $request)
+    public function storeBatch(Request $request)
     {
-        $validatedData = $request->validate([
-            'course_id' => 'required|string|exists:course,course_id',
+        // Xác thực dữ liệu đầu vào
+        $validator = Validator::make($request->all(), [
+            'list_question_id' => 'required|string|exists:list_questions,list_question_id',
+            'questions' => 'required|array',
+            'questions.*.title' => 'required|string',
+            'questions.*.content' => 'required|string',
+            'questions.*.type' => 'required|string|in:multiple_choice,short_answer', // Update to English values
+            'questions.*.options' => 'required_if:questions.*.type,multiple_choice|array', // Update to match new type
+            'questions.*.options.*.option_text' => 'required|string',
+            'questions.*.options.*.is_correct' => 'required|boolean',
         ]);
-        $listQuestion = ListQuestion::create($validatedData);
-        return response()->json(['message' => 'Tạo danh sách câu hỏi thành công!', 'data' => $listQuestion], Response::HTTP_CREATED);
-    }
-    public function storeFromWeb(Request $request)
-    {
-        try {
-            // Tạo mới danh sách câu hỏi
-            $validatedData = $request->validate([
-                'course_id' => 'required|string|exists:course,course_id',
-                'lecturer_id' => 'required|string|exists:lecturer,lecturer_id'
-            ]);
-            $listQuestion = ListQuestion::create([
-                'course_id' => $validatedData['course_id'],
-                'lecturer_id' => $validatedData['lecturer_id'], // Lưu lecturer_id
-            ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Tạo danh sách câu hỏi thành công!',
-                'id' => $listQuestion->list_question_id
-            ], Response::HTTP_CREATED);
-
-        } catch (Exception $e) {
-            // Xử lý lỗi
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Đã xảy ra lỗi khi tạo danh sách câu hỏi: ' . $e->getMessage()
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $validator->errors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        DB::beginTransaction();
+        try {
+            $createdQuestions = [];
+            foreach ($request->questions as $questionData) {
+                // Tạo câu hỏi
+                $question = Question::create([
+                    'list_question_id' => $request->list_question_id,
+                    'title' => $questionData['title'],
+                    'content' => $questionData['content'],
+                    'type' => $questionData['type'],
+                ]);
+
+                // Xử lý các lựa chọn nếu câu hỏi là trắc nghiệm
+                if ($questionData['type'] === 'multiple_choice' && isset($questionData['options'])) {
+                    foreach ($questionData['options'] as $index => $option) {
+                        $newOption = $question->options()->create([
+                            'option_text' => $option['option_text'],
+                            'is_correct' => $option['is_correct'],
+                            'option_order' => $index
+                        ]);
+
+                        if ($option['is_correct']) {
+                            $question->correct_answer = $option['option_text'];
+                            $question->save();
+                        }
+                    }
+                }
+
+                $createdQuestions[] = $question;
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã lưu thành công ' . count($createdQuestions) . ' câu hỏi',
+                'data' => $createdQuestions
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi lưu câu hỏi',
+                'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'course_id' => 'required|exists:course,course_id',
+            'topic' => 'required|string|max:255',
+            'lecturer_id' => 'required|exists:lecturer,lecturer_id'
+        ]);
+
+        $courseId = $validated['course_id'];
+        $topic = $validated['topic'];
+        $lecturerId = $validated['lecturer_id'];
+
+        $existingTopic = ListQuestion::where('topic', $topic)->first();
+        $newTopicCreated = false;
+
+        if (!$existingTopic) {
+            $newTopicRecord = new ListQuestion();
+            $newTopicRecord->topic = $topic;
+            $newTopicRecord->course_id = null;
+            $newTopicRecord->lecturer_id = null;
+            $newTopicRecord->save();
+            $newTopicCreated = true;
+        }
+
+        $listQuestion = new ListQuestion();
+        $listQuestion->course_id = $courseId;
+        $listQuestion->topic = $topic;
+        $listQuestion->lecturer_id = $lecturerId;
+        $listQuestion->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List question created successfully',
+            'list_question_id' => $listQuestion->list_question_id,
+            'new_topic_created' => $newTopicCreated
+        ], 201);
+    }
+    public function getTopicsByCourse($course_id)
+    {
+        try {
+            $topics = ListQuestion::where('course_id', $course_id)
+                ->distinct()
+                ->pluck('topic')
+                ->filter()
+                ->values();
+
+            return response()->json([
+                'topics' => $topics
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Đã xảy ra lỗi khi lấy danh sách chủ đề.',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
     // Cập nhật danh sách câu hỏi

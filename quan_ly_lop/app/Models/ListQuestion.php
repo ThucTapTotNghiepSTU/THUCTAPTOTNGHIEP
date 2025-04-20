@@ -44,5 +44,7 @@ class ListQuestion extends Model
     {
         return $this->hasMany(Question::class, 'list_question_id');
     }
-
+    public function lecturer() {
+        return $this->belongsTo(Lecturer::class, 'lecturer_id');
+    }
 }

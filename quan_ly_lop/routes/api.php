@@ -105,6 +105,7 @@ Route::prefix('list-questions')->group(function () {
     Route::put('/update/{id}', [ListQuestionController::class, 'update']);
     Route::delete('/delete/{id}', [ListQuestionController::class, 'destroy']);
     Route::get('/{lecturer_id}', [ListQuestionController::class, 'getAllListQuestionsWithLecturer']);
+    Route::get('/topics/{course_id}', [ListQuestionController::class, 'getTopicsByCourse']);
 });
 
 // API cho Options
@@ -224,7 +225,7 @@ Route::prefix('lecturer-student')->group(function () {
 
     //  // Lấy bài kiểm tra theo giảng viên
     //  Route::get('/exam/{lecturer_id}', [LecturerAssignmentController::class, 'getExams']);
-;
+    ;
     // Lấy danh sách bài tập theo giảng viên
     Route::get('/assignments', [LecturerAssignmentController::class, 'getAssignments']);
 
