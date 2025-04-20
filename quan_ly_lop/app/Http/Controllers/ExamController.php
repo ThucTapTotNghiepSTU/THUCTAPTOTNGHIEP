@@ -71,6 +71,9 @@ class ExamController extends Controller
             'exam_id'   => $exam->exam_id,
             'title'     => $exam->title,
             'type'      => $exam->type,
+            'start_time'      => $exam->start_time,
+            'end_time'      => $exam->end_time,
+            'isSimultaneous' => $exam->isSimultaneous,
             'questions' => $questions,
         ]);
     }

@@ -11,6 +11,11 @@
                     @csrf
                     <div id="assay-questions"></div>
 
+                    <div class="mb-3">
+                        <label for="file-upload" class="form-label">Tải lên file (nếu có)</label>
+                        <input type="file" class="form-control" id="answer_file" name="answer_file">
+                    </div>
+
                     <div class="text-end mt-3">
                         <button type="submit" class="btn btn-success">Nộp bài</button>
                     </div>
@@ -25,13 +30,25 @@
     @auth
         <meta name="student_id" content="{{ Auth::user()->student_id }}">
     @endauth
-
+    <style>
+        #countdown-timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            z-index: 1000;
+            /* Đảm bảo đếm ngược luôn hiển thị trên các phần tử khác */
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id'); // Lấy tham số id từ URL
+            const id = urlParams.get('id');
             const studentId = document.querySelector('meta[name="student_id"]').getAttribute('content');
-
             const loadingEl = document.getElementById('loading');
             const assayContainer = document.getElementById('assay-container');
             const errorMsg = document.getElementById('error-msg');
@@ -39,7 +56,7 @@
             const questionContainer = document.getElementById('assay-questions');
             const assayTitle = document.getElementById('assay-title');
 
-            // Kiểm tra xem ID có tồn tại không
+            // Kiểm tra ID
             if (!id) {
                 errorMsg.classList.remove('d-none');
                 errorMsg.innerText = "Không tìm thấy ID bài thi hoặc bài tập!";
@@ -48,61 +65,173 @@
 
             try {
                 loadingEl.classList.remove('d-none');
-
                 let res, data;
 
-                // Kiểm tra xem ID là của bài thi hay bài tập
-                res = await fetch(`/api/exams/getById/${id}`); // Kiểm tra bài thi trước
+                // Kiểm tra bài thi
+                res = await fetch(`/api/exams/getById/${id}`);
                 if (res.ok) {
-                    data = await res.json(); // Chỉ chuyển thành JSON nếu phản hồi là OK
+                    data = await res.json();
                 }
 
-                // Nếu không phải bài thi, kiểm tra xem đó có phải bài tập không
+                // Kiểm tra bài tập
                 if (!data) {
-                    res = await fetch(
-                        `/api/assignments/getById/${id}`); // Nếu không phải bài thi thì lấy bài tập
+                    res = await fetch(`/api/assignments/getById/${id}`);
                     if (res.ok) {
                         data = await res.json();
                     }
                 }
-                console.log(data);
-                loadingEl.classList.add('d-none');
 
+                loadingEl.classList.add('d-none');
                 if (!data) {
                     errorMsg.classList.remove('d-none');
                     errorMsg.innerText = "Không tìm thấy bài thi hoặc bài tập!";
                     return;
                 }
-                console.log(data.exam_id,data.assignment_id);
+
                 assayTitle.textContent = data.title;
                 assayContainer.classList.remove('d-none');
 
-                const questions = data.questions || [];
+                const startTimeStr = data.start_time;
+                let endTimeStr = data.end_time;
+                console.log(startTimeStr,endTimeStr);
+                const startTimeISO = startTimeStr.replace(' ', 'T');
+                endTimeStr = endTimeStr.replace(' ', 'T');
 
+
+                const startTime = new Date(startTimeISO).getTime();
+                let endTime = new Date(endTimeStr).getTime();
+                const now = new Date().getTime();
+
+                const isSimultaneous = data.isSimultaneous === true || data.isSimultaneous === 1;
+
+                if (!isSimultaneous) {
+                    endTime += 30 * 24 * 60 * 60 * 1000; // Thêm 30 ngày nếu không phải bài thi cùng thời gian
+                }
+
+                let remainingTime = Math.floor((endTime - now) / 1000);
+                if (remainingTime < 0) {
+                    remainingTime = 0;
+                }
+
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+
+                // Lưu endTime vào localStorage với khóa duy nhất
+                const endTimeKey = `assay_${id}_end_time`;
+                localStorage.setItem(endTimeKey, endTime);
+
+                if (remainingTime > 0 && isSimultaneous) {
+                    const timerEl = document.createElement('div');
+                    timerEl.className = 'alert alert-info text-center';
+                    timerEl.id = 'countdown-timer';
+                    assayContainer.prepend(timerEl);
+
+                    // Hàm tự động nộp bài
+                    async function submitAssayAutomatically() {
+                        const answers = {};
+                        let hasUnanswered = false;
+
+                        questions.forEach(q => {
+                            const textarea = document.querySelector(
+                                `textarea[name="answers[${q.question_id}]"]`);
+                            const answer = textarea ? textarea.value.trim() : "";
+                            if (!answer) {
+                                hasUnanswered = true;
+                            }
+                            answers[q.question_id] = {
+                                question_id: q.question_id,
+                                answer_content: answer || "Chưa trả lời"
+                            };
+                        });
+
+                        const formData = new FormData();
+                        formData.append('student_id', studentId);
+                        formData.append('exam_id', data.exam_id || '');
+                        formData.append('assignment_id', data.assignment_id || '');
+                        formData.append('answers', JSON.stringify(Object.values(answers)));
+
+                        const fileInput = document.getElementById('answer_file');
+                        if (fileInput && fileInput.files.length > 0) {
+                            formData.append('answer_file', fileInput.files[0]);
+                        }
+
+                        try {
+                            const response = await fetch('/api/student/submit-answers', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            const resultText = await response.text();
+                            if (response.ok) {
+                                try {
+                                    const result = JSON.parse(resultText);
+                                    successMsg.classList.remove('d-none');
+                                    successMsg.innerText = result.message || "Tự động nộp bài thành công!";
+                                    assayContainer.classList.add('d-none');
+                                    localStorage.removeItem(endTimeKey);
+                                    setTimeout(() => window.location.href = '/classDetail', 2000);
+                                } catch (e) {
+                                    errorMsg.classList.remove('d-none');
+                                    errorMsg.innerText = "Lỗi xử lý phản hồi từ server.";
+                                }
+                            } else {
+                                errorMsg.classList.remove('d-none');
+                                errorMsg.innerText = resultText ||
+                                    "Không thể tự động nộp bài. Vui lòng thử lại!";
+                            }
+                        } catch (error) {
+                            errorMsg.classList.remove('d-none');
+                            errorMsg.innerText = "Đã xảy ra lỗi khi tự động nộp bài.";
+                            console.error(error);
+                        }
+                    }
+
+                    // Cập nhật thời gian đếm ngược
+                    const updateTimer = () => {
+                        const now = new Date().getTime();
+                        const storedEndTime = parseInt(localStorage.getItem(endTimeKey));
+                        const secondsLeft = Math.floor((storedEndTime - now) / 1000);
+
+                        if (secondsLeft <= 0) {
+                            timerEl.innerText = 'Hết thời gian! Đang nộp bài...';
+                            clearInterval(countdown);
+                            submitAssayAutomatically();
+                            return;
+                        }
+
+                        const minutes = Math.floor(secondsLeft / 60);
+                        const seconds = secondsLeft % 60;
+                        timerEl.innerText =
+                            `Thời gian còn lại: ${minutes} phút ${seconds < 10 ? '0' : ''}${seconds} giây`;
+                    };
+
+
+                    updateTimer();
+                    const countdown = setInterval(updateTimer, 1000);
+                }
+
+                const questions = data.questions || [];
                 questions.forEach((q, index) => {
                     const wrapper = document.createElement('div');
                     wrapper.classList.add('mb-4');
 
                     const questionHtml = `
-                        <p><strong>Câu ${index + 1}:</strong> ${q.content}</p>
-                        <textarea name="answers[${q.question_id}]" class="form-control" rows="4" placeholder="Nhập câu trả lời..."></textarea>
-                    `;
+                <p><strong>Câu ${index + 1}:</strong> ${q.content}</p>
+                <textarea name="answers[${q.question_id}]" class="form-control" rows="4" placeholder="Nhập câu trả lời..."></textarea>
+            `;
 
                     wrapper.innerHTML = questionHtml;
                     questionContainer.appendChild(wrapper);
                 });
 
-                // Xử lý submit bài
                 document.getElementById('assay-form').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const formData = new FormData(e.target);
                     let hasUnanswered = false;
                     const answers = {};
 
-                    // Thu thập dữ liệu câu trả lời
                     questions.forEach(q => {
                         const answer = formData.get(`answers[${q.question_id}]`);
-
                         if (!answer || !answer.trim()) {
                             hasUnanswered = true;
                             alert(`Câu hỏi "${q.content}" chưa được trả lời.`);
@@ -116,35 +245,28 @@
 
                     if (hasUnanswered) return;
 
-
-
-                    // Kiểm tra xem bài thi hay bài tập được chọn
                     if (!data.exam_id && !data.assignment_id) {
                         errorMsg.classList.remove('d-none');
                         errorMsg.innerText = "Bạn phải chọn hoăc bài thi hoặc bài tập!";
                         return;
                     }
 
-                    // Gửi yêu cầu nộp bài
+                    formData.append('student_id', studentId);
+                    formData.append('exam_id', data.exam_id || '');
+                    formData.append('assignment_id', data.assignment_id || '');
+                    formData.append('answers', JSON.stringify(Object.values(answers)));
+
+                    const fileInput = document.getElementById('answer_file');
+                    if (fileInput && fileInput.files.length > 0) {
+                        formData.append('answer_file', fileInput.files[0]);
+                    }
+
                     const response = await fetch('/api/student/submit-answers', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            student_id: studentId,
-                            exam_id: data.exam_id ||
-                            null, // Gửi exam_id nếu có, nếu không thì null
-                            assignment_id: data.assignment_id ||
-                            null, // Gửi assignment_id nếu có, nếu không thì null
-                            answers
-                        })
+                        body: formData
                     });
 
                     const responseText = await response.text();
-                    console.log('Response Text:', responseText);
-
                     if (response.ok) {
                         try {
                             const result = JSON.parse(responseText);
@@ -161,8 +283,6 @@
                         errorMsg.innerText = responseText || "Đã xảy ra lỗi khi nộp bài.";
                     }
                 });
-
-
             } catch (err) {
                 console.error(err);
                 loadingEl.classList.add('d-none');

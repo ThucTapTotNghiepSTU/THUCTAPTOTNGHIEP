@@ -12,6 +12,7 @@ use App\Models\Question;
 use App\Models\Answer;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class StudentAssignmentController extends Controller
 {
@@ -88,6 +89,9 @@ class StudentAssignmentController extends Controller
      */
     public function submitWorkAndAnswers(Request $request)
     {
+        $answers = json_decode($request->input('answers'), true);
+
+        $request->merge(['answers' => $answers]);
         $request->validate([
             'student_id' => 'required|exists:student,student_id',
             'exam_id' => 'nullable|exists:exam,exam_id',
@@ -95,11 +99,32 @@ class StudentAssignmentController extends Controller
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:question,question_id',
             'answers.*.answer_content' => 'required|string',
+            'answer_file' => 'nullable|file|mimes:pdf,docx,txt|max:2048',
         ]);
 
         // Kiểm tra xem chỉ có 1 trong 2 ID (exam_id hoặc assignment_id) tồn tại
         if ((!$request->exam_id && !$request->assignment_id) || ($request->exam_id && $request->assignment_id)) {
             return response()->json(['message' => 'Bạn phải chọn hoặc bài thi hoặc bài tập, không thể cả hai!'], 400);
+        }
+
+        $isLate = false;
+
+        if ($request->exam_id) {
+            $exam = Exam::find($request->exam_id);
+            if ($exam) {
+                $isLate = now()->greaterThan(Carbon::parse($exam->end_time));
+            }
+        } elseif ($request->assignment_id) {
+            $assignment = Assignment::find($request->assignment_id);
+            if ($assignment) {
+                $isLate = now()->greaterThan(Carbon::parse($assignment->end_time));
+            }
+        }
+        // Xử lý lưu file nếu có
+        $filePath = null;
+        if ($request->hasFile('answer_file')) {
+            $file = $request->file('answer_file');
+            $filePath = $file->store('submissions', 'public'); // Lưu file vào thư mục 'submissions' (public disk)
         }
 
         // Tạo Submission
@@ -108,8 +133,8 @@ class StudentAssignmentController extends Controller
             'student_id' => $request->student_id,
             'exam_id' => $request->exam_id,
             'assignment_id' => $request->assignment_id,
-            'answer_file' => null, // Nếu có file đính kèm, xử lý sau
-            'is_late' => false, // Kiểm tra trễ hạn nếu cần
+            'answer_file' => $filePath, // Nếu có file đính kèm, xử lý sau
+            'is_late' => $isLate, // Kiểm tra trễ hạn nếu cần
             'temporary_score' => null,
             'created_at' => now(),
         ]);

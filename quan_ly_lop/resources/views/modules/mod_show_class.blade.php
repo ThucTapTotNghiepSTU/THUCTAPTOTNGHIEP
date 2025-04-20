@@ -19,7 +19,7 @@
                 <div id="assignment-container"></div>
             </div>
         </div>
-        
+
     </div>
 
     @auth
@@ -119,8 +119,13 @@
                 data.exams.forEach(exam => {
                     const isPending = exam.status === 'Pending';
                     const badgeColor = isPending ? 'warning text-dark' : 'success';
-                    const showButton = isPending;
                     const hasScore = exam.temporary_score != null; // Kiểm tra xem bài đã có điểm chưa
+
+                    const now = new Date();
+                    const startTime = new Date(exam.start_time);
+                    const endTime = new Date(exam.end_time);
+                    const showButton = isPending && now >= startTime && now <= endTime;
+
                     examContainer.innerHTML += `
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body">
@@ -137,11 +142,11 @@
                             <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
                         </ul>
                         ${showButton ? `
-                                <a href="/task/start?id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
-                                    <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
-                                </a>` : ''}
+                                        <a href="/task/start?id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
+                                            <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
+                                        </a>` : ''}
                         ${hasScore ? `
-                                <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
+                                        <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -150,8 +155,12 @@
                 data.assignments.forEach(assign => {
                     const isPending = assign.status === 'Pending';
                     const badgeColor = isPending ? 'warning text-dark' : 'success';
-                    const showButton = isPending;
                     const hasScore = assign.temporary_score != null; // Kiểm tra xem bài đã có điểm chưa
+
+                    const now = new Date();
+                    const startTime = new Date(assign.start_time);
+                    const endTime = new Date(assign.end_time);
+                    const showButton = isPending && now >= startTime && now <= endTime;
 
                     assignmentContainer.innerHTML += `
                 <div class="card shadow-sm border-0 mb-4">
@@ -169,11 +178,11 @@
                             <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
                         </ul>
                         ${showButton ? `
-                                <a href="/task/start?id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
-                                    <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
-                                </a>` : ''}
+                                        <a href="/task/start?id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
+                                            <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
+                                        </a>` : ''}
                         ${hasScore ? `
-                                <div class="mt-3"><strong>Điểm:</strong> ${assign.temporary_score}</div>` : ''}
+                                        <div class="mt-3"><strong>Điểm:</strong> ${assign.temporary_score}</div>` : ''}
                     </div>
                 </div>
             `;

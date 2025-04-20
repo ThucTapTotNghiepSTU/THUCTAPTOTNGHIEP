@@ -44,6 +44,7 @@
                                 <p><strong>Loại:</strong> ${exam.type}</p>
                                 <p><strong>Bắt đầu:</strong> ${exam.start_time}</p>
                                 <p><strong>Kết thúc:</strong> ${exam.end_time}</p>
+                                <p><strong>Điểm:</strong> {{ $exam->temporary_score ?? 'Chưa có điểm' }}</p>
                                 <span class="badge bg-${exam.status === 'Pending' ? 'warning' : 'success'}">${exam.status}</span>
                             </div>
                         </div>
@@ -62,12 +63,12 @@
                                 <p><strong>Loại:</strong> ${assign.type}</p>
                                 <p><strong>Bắt đầu:</strong> ${assign.start_time}</p>
                                 <p><strong>Kết thúc:</strong> ${assign.end_time}</p>
-                                <span class="badge bg-${assign.status === 'Pending' ? 'info' : 'success'}">${assign.status}</span>
+                                <p><strong>Điểm:</strong> {{ $assign->temporary_score ?? 'Chưa có điểm' }}</p>
+                                <span class="badge bg-${assign.status === 'Pending' ? 'warning' : 'success'}">${assign.status}</span>
                             </div>
                         </div>
                     `;
                 });
-
             } catch (error) {
                 console.error("Lỗi khi gọi API:", error);
             }
