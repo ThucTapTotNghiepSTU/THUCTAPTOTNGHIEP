@@ -147,6 +147,8 @@ Route::prefix('sub-lists')->group(function () {
     Route::put('/update/{id}', [SubListController::class, 'update']);
     Route::delete('/delete/{id}', [SubListController::class, 'destroy']);
     Route::get('/available-questions/{listQuestionId}', [SubListController::class, 'getAvailableQuestions']);
+    Route::get('/by-lecturer/{lecturerId}', [SubListController::class, 'getAllByLecturer']);
+    Route::get('/lecturer/chi_tiet_ma_de/{sub_list_id}', [SubListController::class, 'show'])->middleware('auth');
 });
 
 // API cho SubListQuestion
