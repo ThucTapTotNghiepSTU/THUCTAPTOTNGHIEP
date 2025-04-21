@@ -142,12 +142,36 @@
 
                         questions.forEach(q => {
                             const selected = document.querySelector(
-                                `input[name="answers[${q.question_id}]"]:checked`);
+                                `input[name="${q.question_id}"]:checked`);
                             answers[q.question_id] = {
                                 question_id: q.question_id,
                                 answer_content: selected ? selected.value : "Chưa trả lời"
                             };
                         });
+                        //xoá đáp án tạm
+                        try {
+
+
+                            const payload = {
+                                student_id: studentId
+                            };
+                            if (data.exam_id) payload.exam_id = data.exam_id;
+                            if (data.assignment_id) payload.assignment_id = data.assignment_id;
+
+                            await fetch(`/answers/temp/delete`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            console.log("Đã xóa đáp án tạm thời trước khi nộp bài.");
+                        } catch (err) {
+                            console.warn("Không thể xóa đáp án tạm:", err);
+                        }
+
                         const autoForm = new FormData();
                         autoForm.append('student_id', studentId);
                         if (data.exam_id) autoForm.append('exam_id', data.exam_id);
@@ -199,6 +223,37 @@
 
                 const questions = data.questions || [];
 
+                //load đáp án
+                let savedAnswers = {};
+
+                try {
+                    const dataID = data.exam_id || data.assignment_id;
+                    const tempUrl = `/api/student/temp-answer/${dataID}/${studentId}`;
+
+                    const tempRes = await fetch(tempUrl);
+                    if (tempRes.ok) {
+                        const tempData = await tempRes.json();
+
+                        if (tempData.length > 0) {
+                            tempData.forEach(a => {
+                                savedAnswers[a.question_id] = a.answer;
+                            });
+                            console.log("tìm thấy đáp án tạm thời.");
+                            console.log("savedAnswers:", savedAnswers);
+                        } else {
+                            console.warn("Không tìm thấy đáp án tạm thời.");
+                        }
+                    } else {
+                        console.warn("Không thể tải đáp án tạm thời: Lỗi từ server.");
+                    }
+                } catch (err) {
+                    console.warn("Không thể tải đáp án tạm thời:", err);
+                }
+
+                // Danh sách lưu tạm đáp án chọn
+                const selectedAnswers = [];
+
+
                 questions.forEach((q, index) => {
                     const wrapper = document.createElement('div');
                     wrapper.classList.add('mb-4');
@@ -206,17 +261,71 @@
                     const questionHtml = `
                         <p><strong>Câu ${index + 1}:</strong> ${q.content}</p>
                         ${q.choices.map((choice, i) => `
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="answers[${q.question_id}]" value="${choice}" id="q${q.question_id}_${i}">
-                                        <label class="form-check-label" for="q${q.question_id}_${i}">
-                                            ${choice}
-                                        </label>
-                                    </div>
-                                `).join('')}
-                    `;
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio"
+                                                            name="${q.question_id}"
+                                                            value="${choice}"
+                                                            id="q${q.question_id}_${i}"
+                                                            ${savedAnswers[q.question_id] === choice ? 'checked' : ''}>
+                                                        <label class="form-check-label" for="q${q.question_id}_${i}">
+                                                            ${choice}
+                                                        </label>
+                                                    </div>
+                                                `).join('')}
+                        `;
 
                     wrapper.innerHTML = questionHtml;
                     questionContainer.appendChild(wrapper);
+                    const answers = []; // Mảng chứa tất cả các câu trả lời đã chọn
+
+                    wrapper.querySelectorAll('input[type="radio"]').forEach(radio => {
+                        radio.addEventListener('change', () => {
+                            const answer = radio.value;
+                            const questionId = radio.name;
+
+                            // Kiểm tra xem câu hỏi đã có trong answers chưa
+                            const existingIndex = answers.findIndex(a => a
+                                .question_id === questionId);
+
+                            if (existingIndex !== -1) {
+                                // Nếu đã có, cập nhật lại đáp án
+                                answers[existingIndex].answer = answer;
+                            } else {
+                                // Nếu chưa có, thêm mới
+                                answers.push({
+                                    question_id: questionId,
+                                    answer: answer
+                                });
+                            }
+
+                            // Tạo payload
+                            const payload = {
+                                student_id: studentId,
+                                answers: answers
+                            };
+
+                            payload.exam_id = data.exam_id || null;
+                            payload.assignment_id = data.assignment_id || null;
+
+                            // Gửi toàn bộ mảng câu trả lời lên server
+                            fetch('/api/student/answers/temp', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify(payload)
+                                })
+                                .then(response => response.json())
+                                .then(() => {
+                                    console.log('Đã lưu tạm các đáp án:', answers);
+                                })
+                                .catch(error => {
+                                    console.error('Lỗi khi lưu tạm đáp án:', error);
+                                });
+                        });
+                    });
+
                 });
 
                 // Xử lý submit bài
@@ -229,7 +338,7 @@
                     // Thu thập dữ liệu câu trả lời
                     questions.forEach(q => {
                         const selected = formData.get(
-                            `answers[${q.question_id}]`); // Lấy câu trả lời từ formData
+                            `${q.question_id}`); // Lấy câu trả lời từ formData
 
                         if (!selected) {
                             hasUnanswered = true;
@@ -244,6 +353,30 @@
                     });
 
                     if (hasUnanswered) return;
+                    //xoá đáp án tạm
+                    try {
+
+
+                        const payload = {
+                            student_id: studentId
+                        };
+                        if (data.exam_id) payload.exam_id = data.exam_id;
+                        if (data.assignment_id) payload.assignment_id = data.assignment_id;
+
+                        await fetch(`/answers/temp/delete`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        console.log("Đã xóa đáp án tạm thời trước khi nộp bài.");
+                    } catch (err) {
+                        console.warn("Không thể xóa đáp án tạm:", err);
+                    }
+
 
                     const submitData = new FormData();
                     submitData.append('student_id', studentId);
