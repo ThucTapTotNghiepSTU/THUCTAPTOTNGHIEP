@@ -6,6 +6,7 @@ use App\Models\SubList;
 use App\Models\ListQuestion;
 use App\Models\SubListQuestion;
 use App\Models\Question;
+use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -14,17 +15,49 @@ class SubListController extends Controller
     // Lấy danh sách tất cả SubList
     public function index()
     {
-        return response()->json(SubList::all());
+        $courses = Course::all();
+        return view('lecturerViews.mod_createQuestionBank', compact('courses'));
     }
     // Lấy thông tin chi tiết một SubList
-    public function show($id)
+    public function show($sub_list_id)
     {
-        $subList = SubList::find($id);
-        if (!$subList) {
-            return response()->json(['message' => 'Không tìm thấy SubList!'], Response::HTTP_NOT_FOUND);
-        }
-        return response()->json($subList);
+        $sublist = SubList::with([
+            'questions.listQuestion.course',
+            'questions.listQuestion.lecturer',
+            'questions.options'
+        ])->findOrFail($sub_list_id);
+
+        return view('lecturerViews.chi_tiet_ma_de', compact('sublist'));
     }
+
+    public function getAllByLecturer($lecturerId, Request $request)
+    {
+        try {
+            $courseId = $request->query('course_id');
+
+            $query = SubList::whereHas('questions.listQuestion', function ($q) use ($lecturerId) {
+                $q->where('lecturer_id', $lecturerId);
+            });
+
+            if ($courseId) {
+                $query->whereHas('questions.listQuestion', function ($q) use ($courseId) {
+                    $q->where('course_id', $courseId);
+                });
+            }
+
+            $subLists = $query->with(['questions.listQuestion.course'])->get();
+
+            if ($subLists->isEmpty()) {
+                return response()->json(['sub_list' => [], 'message' => 'Chưa có mã đề nào cho giảng viên này'], 200);
+            }
+
+            return response()->json(['sub_list' => $subLists], 200);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi khi lấy SubList: ' . $e->getMessage());
+            return response()->json(['message' => 'Lỗi server khi lấy mã đề', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function getAvailableQuestions($listQuestionId)
     {
         $listQuestion = ListQuestion::find($listQuestionId);
@@ -45,43 +78,28 @@ class SubListController extends Controller
             'title' => 'required|string',
             'isShuffle' => 'required|boolean',
             'list_question_id' => 'required|exists:list_question,list_question_id',
-            'number_of_questions' => 'required|integer|min:1',
-            'question_type' => 'nullable|in:Trắc nghiệm,Tự luận', // Sửa ở đây
+            'question_ids' => 'required|array', // Danh sách question_id
+            'question_ids.*' => 'exists:question,question_id', // Kiểm tra từng ID
         ]);
-        // B1: Lọc câu hỏi phù hợp
-        $query = Question::where('list_question_id', $validatedData['list_question_id']);
-        if (!empty($validatedData['question_type'])) {
-            $query->where('type', $validatedData['question_type']);
-        }
-        $availableQuestions = $query->get();
-        // B2: Kiểm tra đủ số lượng chưa
-        if ($availableQuestions->count() < $validatedData['number_of_questions']) {
-            return response()->json([
-                'message' => 'Không đủ số lượng câu hỏi để tạo mã đề!',
-                'available' => $availableQuestions->count(),
-                'required' => $validatedData['number_of_questions'],
-            ], Response::HTTP_BAD_REQUEST);
-        }
-        // B3: Random & chọn đúng số lượng
-        $selectedQuestions = $availableQuestions->shuffle()->take($validatedData['number_of_questions']);
-        // B4: Tạo SubList
+
+        // Tạo SubList
         $subList = SubList::create([
             'title' => $validatedData['title'],
             'isShuffle' => $validatedData['isShuffle'],
-            'list_question_id' => $validatedData['list_question_id'],
         ]);
-        // B5: Gán câu hỏi vào SubListQuestion
-        foreach ($selectedQuestions as $question) {
+
+        // Gán câu hỏi vào SubListQuestion
+        foreach ($validatedData['question_ids'] as $questionId) {
             SubListQuestion::create([
                 'sub_list_id' => $subList->sub_list_id,
-                'question_id' => $question->question_id,
+                'question_id' => $questionId,
             ]);
         }
+
         return response()->json([
             'message' => 'Tạo mã đề thành công!',
             'sub_list' => $subList,
-            'total_questions' => $selectedQuestions->count(),
-            'questions' => $selectedQuestions,
+            'total_questions' => count($validatedData['question_ids']),
         ], Response::HTTP_CREATED);
     }
     public function getAllSublist($listQuestionId)

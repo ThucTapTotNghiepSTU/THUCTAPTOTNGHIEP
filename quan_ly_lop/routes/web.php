@@ -138,8 +138,9 @@ Route::middleware('auth:lecturer')->group(function () {
         return view('lecturerViews.tai_khoan');
     })->name('accountLecturer');
     Route::put('/updateInfo/{id}', [LecturerController::class, 'update'])->name('updateInfo');
-        //lấy danh sách câu hỏi khả dụng trong list question
-    Route::get('/available-questions/{listQuestionId}', [SubListController::class, 'getAvailableQuestions']);
+    Route::get('/lecturer/chi_tiet_ma_de/{sub_list_id}', [SubListController::class, 'show'])->middleware('auth');
+    //Route liên quan đến câu hỏi
+    Route::get('/createQuestion', [ListQuestionController::class, 'index'])->name('createQuestion');
 });
 
 // ========== ROUTE PHỤ: DÙNG NỘI BỘ ==========
