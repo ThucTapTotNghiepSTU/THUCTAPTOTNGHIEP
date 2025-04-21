@@ -21,6 +21,7 @@ use App\Http\Controllers\StudentAssignmentController;
 use App\Http\Controllers\ITCourseController;
 use App\Http\Controllers\LecturerAssignmentController;
 use App\Http\Controllers\StudentTaskController;
+use App\Http\Controllers\TempAnswersController;
 
 // API lấy thông tin user đang đăng nhập
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -211,6 +212,11 @@ Route::prefix('student')->group(function () {
     Route::get('/submissions/{id}', [StudentAssignmentController::class, 'showSubmission']);
     Route::put('/submissions/{id}', [StudentAssignmentController::class, 'updateSubmission']);
     Route::delete('/submissions/{id}', [StudentAssignmentController::class, 'deleteSubmission']);
+
+    // lưu đáp án tạp thời
+    Route::post('/answers/temp', [TempAnswersController::class, 'saveTemp']);
+    Route::get('/temp-answer/{id}/{studentId}', [TempAnswersController::class, 'getTempAnswers']);
+    Route::delete('/answers/temp/delete', [TempAnswersController::class, 'deleteTempAnswers']);
 });
 Route::prefix('it-courses')->group(function () {
     Route::get('/', [ITCourseController::class, 'index']);
@@ -222,11 +228,11 @@ Route::prefix('it-courses')->group(function () {
 // /api/lecturer-student/assignments?lecturer_id=LEC001
 // /api/lecturer-student/exams?lecturer_id=LEC001&type=Trắc nghiệm
 Route::prefix('lecturer-student')->group(function () {
-    //  // Lấy bài tập theo giảng viên
-    //  Route::get('/assignment/{lecturer_id}', [LecturerAssignmentController::class, 'getAssignments']);
+        //  // Lấy bài tập theo giảng viên
+        //  Route::get('/assignment/{lecturer_id}', [LecturerAssignmentController::class, 'getAssignments']);
 
-    //  // Lấy bài kiểm tra theo giảng viên
-    //  Route::get('/exam/{lecturer_id}', [LecturerAssignmentController::class, 'getExams']);
+        //  // Lấy bài kiểm tra theo giảng viên
+        //  Route::get('/exam/{lecturer_id}', [LecturerAssignmentController::class, 'getExams']);
     ;
     // Lấy danh sách bài tập theo giảng viên
     Route::get('/assignments', [LecturerAssignmentController::class, 'getAssignments']);
@@ -244,7 +250,6 @@ Route::prefix('lecturer-student')->group(function () {
 
     // Lấy thống kê nộp bài
     Route::get('/submission-stats', [LecturerAssignmentController::class, 'getSubmissionStats']);
-
 });
 
 
