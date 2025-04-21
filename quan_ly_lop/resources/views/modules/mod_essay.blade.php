@@ -93,7 +93,7 @@
 
                 const startTimeStr = data.start_time;
                 let endTimeStr = data.end_time;
-                console.log(startTimeStr,endTimeStr);
+                console.log(startTimeStr, endTimeStr);
                 const startTimeISO = startTimeStr.replace(' ', 'T');
                 endTimeStr = endTimeStr.replace(' ', 'T');
 
@@ -133,7 +133,7 @@
 
                         questions.forEach(q => {
                             const textarea = document.querySelector(
-                                `textarea[name="answers[${q.question_id}]"]`);
+                                `textarea[name="${q.question_id}"]`);
                             const answer = textarea ? textarea.value.trim() : "";
                             if (!answer) {
                                 hasUnanswered = true;
@@ -143,6 +143,30 @@
                                 answer_content: answer || "Chưa trả lời"
                             };
                         });
+
+                        //xoá đáp án tạm
+                    try {
+
+
+                        const payload = {
+                            student_id: studentId
+                        };
+                        if (data.exam_id) payload.exam_id = data.exam_id;
+                        if (data.assignment_id) payload.assignment_id = data.assignment_id;
+
+                        await fetch(`/answers/temp/delete`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        console.log("Đã xóa đáp án tạm thời trước khi nộp bài.");
+                    } catch (err) {
+                        console.warn("Không thể xóa đáp án tạm:", err);
+                    }
 
                         const formData = new FormData();
                         formData.append('student_id', studentId);
@@ -211,18 +235,101 @@
                 }
 
                 const questions = data.questions || [];
+
+
+                let savedAnswers = {};
+
+                try {
+                    const dataID = data.exam_id || data.assignment_id;
+                    const tempUrl = `/api/student/temp-answer/${dataID}/${studentId}`;
+
+                    const tempRes = await fetch(tempUrl);
+                    if (tempRes.ok) {
+                        const tempData = await tempRes.json();
+
+                        if (tempData.length > 0) {
+                            tempData.forEach(a => {
+                                savedAnswers[a.question_id] = a.answer;
+                            });
+                            console.log("Tìm thấy đáp án tạm thời.");
+                            console.log("savedAnswers:", savedAnswers);
+                        } else {
+                            console.warn("Không tìm thấy đáp án tạm thời.");
+                        }
+                    } else {
+                        console.warn("Không thể tải đáp án tạm thời: Lỗi từ server.");
+                    }
+                } catch (err) {
+                    console.warn("Không thể tải đáp án tạm thời:", err);
+                }
+
+                // Danh sách lưu tạm đáp án chọn
+                const answers = [];
+
                 questions.forEach((q, index) => {
                     const wrapper = document.createElement('div');
                     wrapper.classList.add('mb-4');
 
+                    const textareaId = `answer_${q.question_id}`;
                     const questionHtml = `
-                <p><strong>Câu ${index + 1}:</strong> ${q.content}</p>
-                <textarea name="answers[${q.question_id}]" class="form-control" rows="4" placeholder="Nhập câu trả lời..."></textarea>
-            `;
+                        <p><strong>Câu ${index + 1}:</strong> ${q.content}</p>
+                        <textarea name="${q.question_id}" id="${textareaId}" class="form-control" rows="4" placeholder="Nhập câu trả lời...">${savedAnswers[q.question_id] || ''}</textarea>
+                    `;
 
                     wrapper.innerHTML = questionHtml;
                     questionContainer.appendChild(wrapper);
+
+                    const textarea = wrapper.querySelector('textarea');
+
+                    let typingTimeout;
+
+                    textarea.addEventListener('input', () => {
+                        clearTimeout(typingTimeout);
+                        typingTimeout = setTimeout(() => {
+                            const answer = textarea.value;
+                            const questionId = textarea.name;
+
+                            const existingIndex = answers.findIndex(a => a
+                                .question_id ===
+                                questionId);
+
+                            if (existingIndex !== -1) {
+                                answers[existingIndex].answer = answer;
+                            } else {
+                                answers.push({
+                                    question_id: questionId,
+                                    answer: answer
+                                });
+                            }
+
+                            const payload = {
+                                student_id: studentId,
+                                answers: answers
+                            };
+
+                            payload.exam_id = data.exam_id || null;
+                            payload.assignment_id = data.assignment_id || null;
+
+
+                            fetch('/api/student/answers/temp', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify(payload)
+                                })
+                                .then(response => response.json())
+                                .then(() => {
+                                    console.log('Đã lưu tạm các đáp án:', answers);
+                                })
+                                .catch(error => {
+                                    console.error('Lỗi khi lưu tạm đáp án:', error);
+                                });
+                        }, 1000);
+                    });
                 });
+
 
                 document.getElementById('assay-form').addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -231,7 +338,7 @@
                     const answers = {};
 
                     questions.forEach(q => {
-                        const answer = formData.get(`answers[${q.question_id}]`);
+                        const answer = formData.get(`${q.question_id}`);
                         if (!answer || !answer.trim()) {
                             hasUnanswered = true;
                             alert(`Câu hỏi "${q.content}" chưa được trả lời.`);
@@ -244,6 +351,30 @@
                     });
 
                     if (hasUnanswered) return;
+
+                    //xoá đáp án tạm
+                    try {
+
+
+                        const payload = {
+                            student_id: studentId
+                        };
+                        if (data.exam_id) payload.exam_id = data.exam_id;
+                        if (data.assignment_id) payload.assignment_id = data.assignment_id;
+
+                        await fetch(`/answers/temp/delete`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        console.log("Đã xóa đáp án tạm thời trước khi nộp bài.");
+                    } catch (err) {
+                        console.warn("Không thể xóa đáp án tạm:", err);
+                    }
 
                     if (!data.exam_id && !data.assignment_id) {
                         errorMsg.classList.remove('d-none');

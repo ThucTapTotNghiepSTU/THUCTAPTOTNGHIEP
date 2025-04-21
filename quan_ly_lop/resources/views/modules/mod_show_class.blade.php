@@ -120,7 +120,7 @@
                     const isPending = exam.status === 'Pending';
                     const badgeColor = isPending ? 'warning text-dark' : 'success';
                     const hasScore = exam.temporary_score != null; // Kiểm tra xem bài đã có điểm chưa
-                    const isSimultaneous = data.isSimultaneous === true || data.isSimultaneous === 1;
+                    const isSimultaneous = exam.isSimultaneous === true || exam.isSimultaneous === 1;
 
                     const now = new Date();
                     const startTime = new Date(exam.start_time);
@@ -131,8 +131,8 @@
                         endTimeBonus = new Date(endTime); // clone
                         endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 ngày
                     }
-
                     const showButton = isPending && now >= startTime && now <= endTimeBonus;
+
 
                     examContainer.innerHTML += `
                 <div class="card shadow-sm border-0 mb-4">
@@ -164,15 +164,14 @@
                     const isPending = assign.status === 'Pending';
                     const badgeColor = isPending ? 'warning text-dark' : 'success';
                     const hasScore = assign.temporary_score != null; // Kiểm tra xem bài đã có điểm chưa
-                    const isSimultaneous = data.isSimultaneous === true || data.isSimultaneous === 1;
+                    const isSimultaneous = assign.isSimultaneous === true || assign.isSimultaneous === 1;
 
                     const now = new Date();
                     const startTime = new Date(assign.start_time);
                     const endTime = new Date(assign.end_time);
-                    
+
                     let endTimeBonus = endTime;
                     if (!isSimultaneous) {
-                        endTimeBonus = new Date(endTime); // clone
                         endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 ngày
                     }
 
