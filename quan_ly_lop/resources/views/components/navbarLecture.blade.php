@@ -127,7 +127,6 @@
                             </li>
                         @else
                             <li><a class="dropdown-item" href="{{ route('Showlogin') }}">Đăng nhập</a></li>
-                            <li><a class="dropdown-item" href="{{ route('register') }}">Đăng ký</a></li>
                         @endauth
                     </ul>
                 </li>

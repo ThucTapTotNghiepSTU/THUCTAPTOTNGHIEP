@@ -15,35 +15,34 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label for="sublist-title" class="form-label">Tiêu đề</label>
-                                <input type="text" class="form-control" id="sublist-title" required>
+                                <input type="text" class="form-control" id="sublist-title" name="title" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="sublist-content" class="form-label">Nội dung</label>
-                                <textarea class="form-control" id="sublist-content" rows="3" required></textarea>
+                                <textarea class="form-control" id="sublist-content" name="content" rows="3"
+                                    required></textarea>
                             </div>
-
                             <div class="mb-3">
                                 <label for="sublist-type" class="form-label">Loại câu hỏi</label>
-                                <select class="form-select" id="sublist-type" required>
+                                <select class="form-select" id="sublist-type" name="type" required>
                                     <option value="Trắc nghiệm">Trắc nghiệm</option>
                                     <option value="Tự luận">Tự luận</option>
                                 </select>
                             </div>
-
-                            <!-- Phần đáp án -->
                             <div class="mb-3" id="sublist-options-group">
                                 <label class="form-label">Đáp án</label>
-                                <input type="text" class="form-control mb-2" id="sublist-option-A" placeholder="Đáp án A">
-                                <input type="text" class="form-control mb-2" id="sublist-option-B" placeholder="Đáp án B">
-                                <input type="text" class="form-control mb-2" id="sublist-option-C" placeholder="Đáp án C">
-                                <input type="text" class="form-control mb-2" id="sublist-option-D" placeholder="Đáp án D">
+                                <input type="text" class="form-control mb-2" id="sublist-option-A" name="options[A][text]"
+                                    placeholder="Đáp án A">
+                                <input type="text" class="form-control mb-2" id="sublist-option-B" name="options[B][text]"
+                                    placeholder="Đáp án B">
+                                <input type="text" class="form-control mb-2" id="sublist-option-C" name="options[C][text]"
+                                    placeholder="Đáp án C">
+                                <input type="text" class="form-control mb-2" id="sublist-option-D" name="options[D][text]"
+                                    placeholder="Đáp án D">
                             </div>
-
-                            <!-- Chọn đáp án đúng -->
                             <div class="mb-3" id="sublist-correct-answer-group">
                                 <label for="sublist-correct-answer" class="form-label">Đáp án đúng</label>
-                                <select class="form-select" id="sublist-correct-answer" required>
+                                <select class="form-select" id="sublist-correct-answer" name="correct_answer" required>
                                     <option value="">-- Chọn --</option>
                                     <option value="A">Đáp án A</option>
                                     <option value="B">Đáp án B</option>
@@ -51,6 +50,7 @@
                                     <option value="D">Đáp án D</option>
                                 </select>
                             </div>
+                            <div id="sublist-error-message" class="text-danger"></div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -61,68 +61,10 @@
             </div>
         </div>
 
-        <!-- Modal Tạo Câu Hỏi -->
-        <div class="modal fade" id="createQuestionModal" tabindex="-1" aria-labelledby="createQuestionModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <form id="createQuestionForm">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="createQuestionModalLabel">Tạo câu hỏi mới</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="create-title" class="form-label">Tiêu đề</label>
-                                <input type="text" class="form-control" id="create-title" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="create-content" class="form-label">Nội dung</label>
-                                <textarea class="form-control" id="create-content" rows="3" required></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="create-type" class="form-label">Loại câu hỏi</label>
-                                <select class="form-select" id="create-type" required>
-                                    <option value="Trắc nghiệm">Trắc nghiệm</option>
-                                    <option value="Tự luận">Tự luận</option>
-                                </select>
-                            </div>
-
-                            <!-- Phần đáp án -->
-                            <div class="mb-3" id="create-options-group">
-                                <label class="form-label">Đáp án</label>
-                                <input type="text" class="form-control mb-2" id="create-option-A" placeholder="Đáp án A">
-                                <input type="text" class="form-control mb-2" id="create-option-B" placeholder="Đáp án B">
-                                <input type="text" class="form-control mb-2" id="create-option-C" placeholder="Đáp án C">
-                                <input type="text" class="form-control mb-2" id="create-option-D" placeholder="Đáp án D">
-                            </div>
-
-                            <!-- Chọn đáp án đúng -->
-                            <div class="mb-3" id="create-correct-answer-group">
-                                <label for="create-correct-answer" class="form-label">Đáp án đúng</label>
-                                <select class="form-select" id="create-correct-answer" required>
-                                    <option value="">-- Chọn --</option>
-                                    <option value="A">Đáp án A</option>
-                                    <option value="B">Đáp án B</option>
-                                    <option value="C">Đáp án C</option>
-                                    <option value="D">Đáp án D</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Nút Quay lại và Tạo câu hỏi -->
         <div class="d-flex gap-2 mb-4">
             <button type="button" class="btn btn-secondary" onclick="window.history.back()">Quay lại</button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSublistModal">Tạo câu hỏi mới</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSublistModal">Tạo
+                câu hỏi mới</button>
         </div>
 
         <h2 class="mb-4 text-primary fw-bold">📋 Chi tiết câu hỏi</h2>
@@ -144,6 +86,7 @@
         <div class="accordion" id="questionList"></div>
 
         <!-- Modal Sửa Câu Hỏi -->
+        <!-- Modal Sửa Câu Hỏi -->
         <div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -154,39 +97,37 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                         </div>
                         <div class="modal-body">
-                            <input type="hidden" id="edit-question-id">
-
+                            <input type="hidden" id="edit-question-id" name="question_id">
                             <div class="mb-3">
                                 <label for="edit-title" class="form-label">Tiêu đề</label>
-                                <input type="text" class="form-control" id="edit-title" required>
+                                <input type="text" class="form-control" id="edit-title" name="title" required>
                             </div>
-
                             <div class="mb-3">
                                 <label for="edit-content" class="form-label">Nội dung</label>
-                                <textarea class="form-control" id="edit-content" rows="3" required></textarea>
+                                <textarea class="form-control" id="edit-content" name="content" rows="3"
+                                    required></textarea>
                             </div>
-
                             <div class="mb-3">
                                 <label for="edit-type" class="form-label">Loại câu hỏi</label>
-                                <select class="form-select" id="edit-type">
+                                <select class="form-select" id="edit-type" name="type">
                                     <option value="Trắc nghiệm">Trắc nghiệm</option>
                                     <option value="Tự luận">Tự luận</option>
                                 </select>
                             </div>
-
-                            <!-- Phần đáp án -->
                             <div class="mb-3" id="edit-options-group">
                                 <label class="form-label">Đáp án</label>
-                                <input type="text" class="form-control mb-2" id="edit-option-A" placeholder="Đáp án A">
-                                <input type="text" class="form-control mb-2" id="edit-option-B" placeholder="Đáp án B">
-                                <input type="text" class="form-control mb-2" id="edit-option-C" placeholder="Đáp án C">
-                                <input type="text" class="form-control mb-2" id="edit-option-D" placeholder="Đáp án D">
+                                <input type="text" class="form-control mb-2" id="edit-option-A" name="options[A][text]"
+                                    placeholder="Đáp án A">
+                                <input type="text" class="form-control mb-2" id="edit-option-B" name="options[B][text]"
+                                    placeholder="Đáp án B">
+                                <input type="text" class="form-control mb-2" id="edit-option-C" name="options[C][text]"
+                                    placeholder="Đáp án C">
+                                <input type="text" class="form-control mb-2" id="edit-option-D" name="options[D][text]"
+                                    placeholder="Đáp án D">
                             </div>
-
-                            <!-- Chọn đáp án đúng -->
                             <div class="mb-3" id="edit-correct-answer-group">
                                 <label for="edit-correct-answer" class="form-label">Đáp án đúng</label>
-                                <select class="form-select" id="edit-correct-answer" required>
+                                <select class="form-select" id="edit-correct-answer" name="correct_answer" required>
                                     <option value="">-- Chọn --</option>
                                     <option value="A">Đáp án A</option>
                                     <option value="B">Đáp án B</option>
@@ -194,6 +135,7 @@
                                     <option value="D">Đáp án D</option>
                                 </select>
                             </div>
+                            <div id="edit-error-message" class="text-danger"></div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -203,6 +145,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -239,48 +182,42 @@
                     .then(response => response.json())
                     .then(result => {
                         const questionList = document.getElementById("questionList");
-
                         if (!result.data) {
                             questionList.innerHTML = `<div class="alert alert-warning">Không tìm thấy danh sách câu hỏi!</div>`;
                             return;
                         }
-
                         const { course_id, course_name, questions } = result.data;
                         document.getElementById("course-name").textContent = course_name;
-
                         if (!questions || questions.length === 0) {
                             questionList.innerHTML = `<div class="alert alert-warning">Chưa có câu hỏi nào.</div>`;
                             return;
                         }
-
-                        questionList.innerHTML = ''; // Xóa danh sách cũ
+                        questionList.innerHTML = '';
                         questions.forEach((question, index) => {
                             const html = `
-                                <div class="accordion-item mb-2" id="question-${question.question_id}">
-                                    <h2 class="accordion-header" id="heading${index}">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapse${index}">
-                                            Câu hỏi: ${question.title}
-                                        </button>
-                                    </h2>
-                                    <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#questionList">
-                                        <div class="accordion-body">
-                                            <p><strong>Nội dung:</strong> ${question.content}</p>
-                                            <p><strong>Loại:</strong> ${question.type}</p>
-                                            <p><strong>Đáp án đúng:</strong> ${question.correct_answer ?? 'Không có'}</p>
-                                            ${renderOptions(question.options)}
-                                            <div class="d-flex gap-2 mt-3">
-                                                <button class="btn btn-warning btn-sm edit-button" data-question-id="${question.question_id}">Sửa</button>
-                                                <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${question.question_id}')">Xóa bỏ</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
+                                                        <div class="accordion-item mb-2" id="question-${question.question_id}">
+                                                            <h2 class="accordion-header" id="heading${index}">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                                                        data-bs-target="#collapse${index}">
+                                                                    Câu hỏi: ${question.title}
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#questionList">
+                                                                <div class="accordion-body">
+                                                                    <p><strong>Nội dung:</strong> ${question.content}</p>
+                                                                    <p><strong>Loại:</strong> ${question.type}</p>
+                                                                    <p><strong>Đáp án đúng:</strong> ${question.correct_answer ?? 'Không có'}</p>
+                                                                    ${renderOptions(question)}
+                                                                    <div class="d-flex gap-2 mt-3">
+                                                                        <button class="btn btn-warning btn-sm edit-button" data-question-id="${question.question_id}">Sửa</button>
+                                                                        <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${question.question_id}')">Xóa bỏ</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    `;
                             questionList.insertAdjacentHTML('beforeend', html);
                         });
-
-                        // Gán sự kiện cho các nút "Sửa"
                         const editButtons = document.querySelectorAll('.edit-button');
                         editButtons.forEach(button => {
                             button.addEventListener('click', function () {
@@ -297,26 +234,27 @@
 
             // Hàm mở modal tạo câu hỏi
             window.createQuestion = function () {
-                const modal = new bootstrap.Modal(document.getElementById('createQuestionModal'));
+                const modal = new bootstrap.Modal(document.getElementById('createSublistModal')); // Sử dụng 'createSublistModal'
                 modal.show();
-
                 // Reset form khi mở modal
-                document.getElementById('createQuestionForm').reset();
-                document.getElementById('create-options-group').style.display = 'block';
-                document.getElementById('create-correct-answer-group').style.display = 'block';
+                document.getElementById('createSublistForm').reset();
+                document.getElementById('sublist-options-group').style.display = 'block';
+                document.getElementById('sublist-correct-answer-group').style.display = 'block';
             };
 
-            // Xử lý khi thay đổi loại câu hỏi trong modal tạo (createQuestionModal)
-            document.getElementById('create-type').addEventListener('change', function () {
+            // Xử lý khi thay đổi loại câu hỏi trong modal tạo
+            document.getElementById('sublist-type').addEventListener('change', function () { // Sửa từ 'create-type' thành 'sublist-type'
                 const type = this.value;
-                const optionsGroup = document.getElementById('create-options-group');
-                const correctAnswerGroup = document.getElementById('create-correct-answer-group');
+                const optionsGroup = document.getElementById('sublist-options-group');
+                const correctAnswerGroup = document.getElementById('sublist-correct-answer-group');
                 if (type === 'Tự luận') {
                     optionsGroup.style.display = 'none';
                     correctAnswerGroup.style.display = 'none';
+                    document.getElementById('sublist-correct-answer').required = false;
                 } else {
                     optionsGroup.style.display = 'block';
                     correctAnswerGroup.style.display = 'block';
+                    document.getElementById('sublist-correct-answer').required = true;
                 }
             });
 
@@ -335,72 +273,46 @@
                     document.getElementById('sublist-correct-answer').required = true;
                 }
             });
-
-            // Xử lý form tạo câu hỏi (createQuestionModal)
-            document.getElementById('createQuestionForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const type = document.getElementById('create-type').value;
-                const data = {
-                    list_question_id: listQuestionId,
-                    title: document.getElementById('create-title').value,
-                    content: document.getElementById('create-content').value,
-                    type: type,
-                };
-
-                if (type === 'Trắc nghiệm') {
-                    data.answer_a = document.getElementById('create-option-A').value;
-                    data.answer_b = document.getElementById('create-option-B').value;
-                    data.answer_c = document.getElementById('create-option-C').value;
-                    data.answer_d = document.getElementById('create-option-D').value;
-                    const correctAnswerIndex = document.getElementById('create-correct-answer').value;
-                    data.correct_answer = correctAnswerIndex ? document.getElementById(`create-option-${correctAnswerIndex}`).value : null;
-                }
-
-                fetch('http://127.0.0.1:8000/api/questions/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Tạo câu hỏi thất bại');
-                        return response.json();
-                    })
-                    .then(result => {
-                        alert("Tạo câu hỏi thành công!");
-                        bootstrap.Modal.getInstance(document.getElementById('createQuestionModal')).hide();
-                        fetchQuestionList(); // Cập nhật danh sách câu hỏi
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        alert("Có lỗi khi tạo câu hỏi!");
-                    });
-            });
-
             // Xử lý form tạo câu hỏi (createSublistModal)
             document.getElementById('createSublistForm').addEventListener('submit', function (e) {
                 e.preventDefault();
+                const form = this;
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
 
-                const type = document.getElementById('sublist-type').value;
-                const data = {
-                    list_question_id: listQuestionId,
-                    title: document.getElementById('sublist-title').value,
-                    content: document.getElementById('sublist-content').value,
-                    type: type,
-                };
+                // Xử lý dữ liệu options cho câu hỏi trắc nghiệm
+                if (data.type === 'Trắc nghiệm') {
+                    const options = [
+                        { text: data['options[A][text]'] || '' },
+                        { text: data['options[B][text]'] || '' },
+                        { text: data['options[C][text]'] || '' },
+                        { text: data['options[D][text]'] || '' }
+                    ].filter(opt => opt.text && opt.text.trim() !== '');
 
-                if (type === 'Trắc nghiệm') {
-                    data.answer_a = document.getElementById('sublist-option-A').value;
-                    data.answer_b = document.getElementById('sublist-option-B').value;
-                    data.answer_c = document.getElementById('sublist-option-C').value;
-                    data.answer_d = document.getElementById('sublist-option-D').value;
-                    const correctAnswerIndex = document.getElementById('sublist-correct-answer').value;
-                    data.correct_answer = correctAnswerIndex ? document.getElementById(`sublist-option-${correctAnswerIndex}`).value : null;
+                    if (options.length < 2) {
+                        document.getElementById('sublist-error-message').textContent = 'Câu hỏi trắc nghiệm cần ít nhất 2 đáp án không rỗng!';
+                        return;
+                    }
+                    if (!data.correct_answer) {
+                        document.getElementById('sublist-error-message').textContent = 'Vui lòng chọn một đáp án đúng!';
+                        return;
+                    }
+
+                    data.options = options;
+                    delete data['options[A][text]'];
+                    delete data['options[B][text]'];
+                    delete data['options[C][text]'];
+                    delete data['options[D][text]'];
+                } else {
+                    delete data.options;
+                    delete data.correct_answer;
+                    delete data['options[A][text]'];
+                    delete data['options[B][text]'];
+                    delete data['options[C][text]'];
+                    delete data['options[D][text]'];
                 }
+
+                data.list_question_id = listQuestionId;
 
                 fetch('http://127.0.0.1:8000/api/questions/create', {
                     method: 'POST',
@@ -412,60 +324,70 @@
                     body: JSON.stringify(data)
                 })
                     .then(response => {
-                        if (!response.ok) throw new Error('Tạo câu hỏi thất bại');
+                        if (!response.ok) {
+                            // Ném lỗi nếu trạng thái không phải 2xx
+                            return response.json().then(errorData => {
+                                throw new Error(`HTTP error ${response.status}: ${JSON.stringify(errorData)}`);
+                            });
+                        }
                         return response.json();
                     })
                     .then(result => {
-                        alert("Tạo câu hỏi thành công!");
-                        bootstrap.Modal.getInstance(document.getElementById('createSublistModal')).hide();
-                        fetchQuestionList(); // Cập nhật danh sách câu hỏi
+                        if (result.errors) {
+                            document.getElementById('sublist-error-message').textContent = Object.values(result.errors).flat().join(', ');
+                        } else {
+                            alert("Tạo câu hỏi thành công!");
+                            bootstrap.Modal.getInstance(document.getElementById('createSublistModal')).hide();
+                            form.reset();
+                            fetchQuestionList();
+                        }
                     })
                     .catch(error => {
-                        console.error(error);
-                        alert("Có lỗi khi tạo câu hỏi: " + error.message);
+                        console.error('Lỗi khi tạo câu hỏi:', error);
+                        document.getElementById('sublist-error-message').textContent = `Lỗi: ${error.message}`;
                     });
             });
-
-            function renderOptions(options) {
-                if (!options || options.length === 0) return '';
+            function renderOptions(question) {
+                if (question.type !== 'Trắc nghiệm') return '';
+                const options = question.options || [];
+                if (options.length === 0) return '<p class="text-muted">Không có đáp án</p>';
                 return `
-                    <p><strong>Các lựa chọn:</strong></p>
-                    <ul>
-                        <li>${options[0]}</li>
-                        <li>${options[1]}</li>
-                        <li>${options[2]}</li>
-                        <li>${options[3]}</li>
-                    </ul>
-                `;
+                                            <p><strong>Các lựa chọn:</strong></p>
+                                            <ul>
+                                                ${options.map(option => `<li>${option.option_text}${option.is_correct ? ' (Đúng)' : ''}</li>`).join('')}
+                                            </ul>
+                                        `;
             }
 
             function editQuestion(questionId) {
-                const card = document.getElementById(`question-${questionId}`);
-                const title = card.querySelector('.accordion-button').textContent.replace("Câu hỏi: ", "").trim();
-                const content = card.querySelector('p:nth-of-type(1)').textContent.replace("Nội dung:", "").trim();
-                const type = card.querySelector('p:nth-of-type(2)').textContent.replace("Loại:", "").trim();
-                const correctAnswer = card.querySelector('p:nth-of-type(3)').textContent.replace("Đáp án đúng:", "").trim();
-                const options = card.querySelectorAll('.accordion-body ul li');
-
-                document.getElementById('edit-question-id').value = questionId;
-                document.getElementById('edit-title').value = title;
-                document.getElementById('edit-content').value = content;
-                document.getElementById('edit-type').value = type;
-                document.getElementById('edit-correct-answer').value = correctAnswer;
-
-                if (type === "Tự luận") {
-                    document.getElementById('edit-options-group').style.display = 'none';
-                    document.getElementById('edit-correct-answer-group').style.display = 'none';
-                } else {
-                    document.getElementById('edit-options-group').style.display = 'block';
-                    document.getElementById('edit-correct-answer-group').style.display = 'block';
-                    options.forEach((option, index) => {
-                        const optionValue = option.textContent.trim();
-                        document.getElementById(`edit-option-${String.fromCharCode(65 + index)}`).value = optionValue;
+                fetch(`http://127.0.0.1:8000/api/questions/getById/${questionId}`)
+                    .then(response => response.json())
+                    .then(question => {
+                        document.getElementById('edit-question-id').value = questionId;
+                        document.getElementById('edit-title').value = question.title;
+                        document.getElementById('edit-content').value = question.content;
+                        document.getElementById('edit-type').value = question.type;
+                        if (question.type === 'Tự luận') {
+                            document.getElementById('edit-options-group').style.display = 'none';
+                            document.getElementById('edit-correct-answer-group').style.display = 'none';
+                            document.getElementById('edit-correct-answer').required = false;
+                        } else {
+                            document.getElementById('edit-options-group').style.display = 'block';
+                            document.getElementById('edit-correct-answer-group').style.display = 'block';
+                            document.getElementById('edit-correct-answer').required = true;
+                            document.getElementById('edit-option-A').value = question.options[0]?.option_text || '';
+                            document.getElementById('edit-option-B').value = question.options[1]?.option_text || '';
+                            document.getElementById('edit-option-C').value = question.options[2]?.option_text || '';
+                            document.getElementById('edit-option-D').value = question.options[3]?.option_text || '';
+                            const correctIndex = question.options.findIndex(option => option.is_correct);
+                            document.getElementById('edit-correct-answer').value = correctIndex >= 0 ? ['A', 'B', 'C', 'D'][correctIndex] : '';
+                        }
+                        new bootstrap.Modal(document.getElementById('editQuestionModal')).show();
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi lấy câu hỏi:', error);
+                        alert('Lỗi khi lấy dữ liệu câu hỏi!');
                     });
-                }
-
-                new bootstrap.Modal(document.getElementById('editQuestionModal')).show();
             }
 
             window.deleteQuestion = function (questionId) {
@@ -487,30 +409,47 @@
                         alert("Xóa thất bại. Vui lòng thử lại!");
                     });
             };
-
+            document.getElementById('edit-type').addEventListener('change', function () {
+                const type = this.value;
+                const optionsGroup = document.getElementById('edit-options-group');
+                const correctAnswerGroup = document.getElementById('edit-correct-answer-group');
+                if (type === 'Tự luận') {
+                    optionsGroup.style.display = 'none';
+                    correctAnswerGroup.style.display = 'none';
+                    document.getElementById('edit-correct-answer').required = false;
+                } else {
+                    optionsGroup.style.display = 'block';
+                    correctAnswerGroup.style.display = 'block';
+                    document.getElementById('edit-correct-answer').required = true;
+                }
+            });
             // Xử lý form chỉnh sửa câu hỏi
             document.getElementById('editQuestionForm').addEventListener('submit', function (e) {
                 e.preventDefault();
+                const form = this;
                 const questionId = document.getElementById('edit-question-id').value;
-                const type = document.getElementById('edit-type').value;
-                const data = {
-                    list_question_id: listQuestionId,
-                    title: document.getElementById('edit-title').value,
-                    content: document.getElementById('edit-content').value,
-                    type: type,
-                };
-
-                if (type === 'Trắc nghiệm') {
-                    data.answer_a = document.getElementById('edit-option-A').value;
-                    data.answer_b = document.getElementById('edit-option-B').value;
-                    data.answer_c = document.getElementById('edit-option-C').value;
-                    data.answer_d = document.getElementById('edit-option-D').value;
-                    const correctAnswerIndex = document.getElementById('edit-correct-answer').value;
-                    data.correct_answer = correctAnswerIndex ? document.getElementById(`edit-option-${correctAnswerIndex}`).value : null;
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                if (data.type === 'Trắc nghiệm') {
+                    const options = [
+                        data['options[A][text]'],
+                        data['options[B][text]'],
+                        data['options[C][text]'],
+                        data['options[D][text]']
+                    ].filter(opt => opt && opt.trim() !== '');
+                    if (options.length < 2) {
+                        document.getElementById('edit-error-message').textContent = 'Câu hỏi trắc nghiệm cần ít nhất 2 đáp án không rỗng!';
+                        return;
+                    }
+                    if (!data.correct_answer) {
+                        document.getElementById('edit-error-message').textContent = 'Vui lòng chọn một đáp án đúng!';
+                        return;
+                    }
                 } else {
-                    data.correct_answer = null;
+                    delete data.options;
+                    delete data.correct_answer;
                 }
-
+                data.list_question_id = listQuestionId;
                 fetch(`http://127.0.0.1:8000/api/questions/update/${questionId}`, {
                     method: 'PUT',
                     headers: {
@@ -520,52 +459,44 @@
                     },
                     body: JSON.stringify(data)
                 })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Cập nhật thất bại');
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(result => {
-                        alert("Cập nhật thành công!");
-                        const card = document.getElementById(`question-${questionId}`);
-                        card.querySelector('.accordion-button').textContent = `Câu hỏi: ${data.title}`;
-                        card.querySelector('p:nth-of-type(1)').textContent = `Nội dung: ${data.content}`;
-                        card.querySelector('p:nth-of-type(2)').textContent = `Loại: ${data.type}`;
-                        card.querySelector('p:nth-of-type(3)').textContent = `Đáp án đúng: ${data.correct_answer || 'Không có'}`;
-                        if (type === 'Trắc nghiệm') {
-                            const optionsList = card.querySelector('.accordion-body ul');
-                            if (optionsList) {
-                                optionsList.innerHTML = `
-                                    <li>${data.answer_a}</li>
-                                    <li>${data.answer_b}</li>
-                                    <li>${data.answer_c}</li>
-                                    <li>${data.answer_d}</li>
-                                `;
-                            } else {
-                                card.querySelector('.accordion-body').insertAdjacentHTML('beforeend', `
-                                    <p><strong>Các lựa chọn:</strong></p>
-                                    <ul>
-                                        <li>${data.answer_a}</li>
-                                        <li>${data.answer_b}</li>
-                                        <li>${data.answer_c}</li>
-                                        <li>${data.answer_d}</li>
-                                    </ul>
-                                `);
-                            }
+                        if (result.errors) {
+                            document.getElementById('edit-error-message').textContent = Object.values(result.errors).flat().join(', ');
                         } else {
-                            const optionsSection = card.querySelector('.accordion-body p:has(strong:contains("Các lựa chọn"))');
-                            if (optionsSection) {
-                                optionsSection.nextElementSibling.remove();
-                                optionsSection.remove();
-                            }
+                            alert("Cập nhật câu hỏi thành công!");
+                            bootstrap.Modal.getInstance(document.getElementById('editQuestionModal')).hide();
+                            form.reset();
+                            fetchQuestionList();
                         }
-                        bootstrap.Modal.getInstance(document.getElementById('editQuestionModal')).hide();
                     })
                     .catch(error => {
-                        console.error(error);
-                        alert("Có lỗi khi cập nhật câu hỏi!");
+                        console.error('Lỗi khi cập nhật câu hỏi:', error);
+                        document.getElementById('edit-error-message').textContent = 'Có lỗi khi cập nhật câu hỏi!';
                     });
             });
+            window.deleteQuestion = function (questionId) {
+                if (!confirm("Bạn có chắc chắn muốn xóa câu hỏi này không?")) return;
+                fetch(`http://127.0.0.1:8000/api/questions/${questionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Lỗi khi xóa câu hỏi.");
+                        alert("Xóa câu hỏi thành công!");
+                        fetchQuestionList();
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi xóa câu hỏi:', error);
+                        alert("Xóa thất bại. Vui lòng thử lại!");
+                    });
+            };
         });
+
     </script>
 
     <style>
