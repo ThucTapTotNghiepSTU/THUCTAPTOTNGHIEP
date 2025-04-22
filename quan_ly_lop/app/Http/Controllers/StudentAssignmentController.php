@@ -440,4 +440,133 @@ class StudentAssignmentController extends Controller
 
         return response()->json(['message' => 'Xoá thành công']);
     }
+    /**
+     * Lưu tạm câu trả lời
+     */
+    public function saveTemporaryAnswer(Request $request)
+    {
+        // Lấy student_id từ request, cho phép truyền id để test
+        $studentId = $request->student_id ?? 'ST001'; // Mặc định là 'ST001' nếu không có
+        $assignmentId = $request->assignment_id;
+        $examId = $request->exam_id;
+        $answers = $request->answers; // Array of question_id and answer
+
+        // Kiểm tra xem đã có submission tạm thời chưa
+        $submission = Submission::where([
+            'student_id' => $studentId,
+        ])
+            ->when($assignmentId, function ($query) use ($assignmentId) {
+                return $query->where('assignment_id', $assignmentId);
+            })
+            ->when($examId, function ($query) use ($examId) {
+                return $query->where('exam_id', $examId);
+            })
+            ->first();
+
+        // Nếu chưa có, tạo mới
+        if (!$submission) {
+            $submission = Submission::create([
+                'submission_id' => Str::uuid(),
+                'student_id' => $studentId,
+                'assignment_id' => $assignmentId,
+                'exam_id' => $examId,
+                'created_at' => now(),
+                'is_late' => false,
+            ]);
+        }
+
+        // Lưu hoặc cập nhật từng câu trả lời
+        foreach ($answers as $questionData) {
+            Answer::updateOrCreate(
+                [
+                    'submission_id' => $submission->submission_id,
+                    'question_title' => $questionData['question_title'],
+                ],
+                [
+                    'answer_id' => $questionData['answer_id'] ?? Str::uuid(),
+                    'question_content' => $questionData['question_content'],
+                    'question_answer' => $questionData['answer'],
+                ]
+            );
+        }
+
+        return response()->json([
+            'message' => 'Đã lưu tạm thời',
+            'submission_id' => $submission->submission_id,
+            'student_id' => $studentId
+        ]);
+    }
+
+    /**
+     * Lấy bài làm tạm thời
+     */
+    public function getTemporarySubmission(Request $request)
+    {
+        // Lấy student_id từ request, cho phép truyền id để test
+        $studentId = $request->student_id ?? 'ST001'; // Mặc định là 'ST001' nếu không có
+        $assignmentId = $request->assignment_id;
+        $examId = $request->exam_id;
+
+        $query = Submission::where('student_id', $studentId);
+
+        if ($assignmentId) {
+            $query->where('assignment_id', $assignmentId);
+        }
+
+        if ($examId) {
+            $query->where('exam_id', $examId);
+        }
+
+        $submission = $query->first();
+
+        if (!$submission) {
+            return response()->json([
+                'message' => 'Không tìm thấy bài làm tạm thời',
+                'student_id' => $studentId,
+                'assignment_id' => $assignmentId,
+                'exam_id' => $examId
+            ], 404);
+        }
+
+        // Get answers separately - relationship access through a method is more reliable
+        $answers = Answer::where('submission_id', $submission->submission_id)->get();
+
+        return response()->json([
+            'submission' => $submission,
+            'answers' => $answers
+        ]);
+    }
+
+    /**
+     * Hoàn thành và nộp bài
+     */
+    public function finalizeSubmission(Request $request)
+    {
+        $submissionId = $request->submission_id;
+        $submission = Submission::findOrFail($submissionId);
+
+        // Kiểm tra thời gian
+        if ($submission->assignment_id) {
+            $assignment = Assignment::find($submission->assignment_id);
+            if ($assignment) {
+                $isLate = now() > $assignment->end_time;
+                $submission->is_late = $isLate;
+            }
+        } elseif ($submission->exam_id) {
+            $exam = Exam::find($submission->exam_id);
+            if ($exam) {
+                $isLate = now() > $exam->end_time;
+                $submission->is_late = $isLate;
+            }
+        }
+
+        // Cập nhật trạng thái - use update_at field from schema
+        $submission->update_at = now();
+        $submission->save();
+
+        return response()->json([
+            'message' => 'Đã nộp bài thành công',
+            'submission' => $submission
+        ]);
+    }
 }

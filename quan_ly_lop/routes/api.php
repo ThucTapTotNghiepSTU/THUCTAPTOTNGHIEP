@@ -207,6 +207,9 @@ Route::prefix('student')->group(function () {
     Route::get('/submissions/{id}', [StudentAssignmentController::class, 'showSubmission']);
     Route::put('/submissions/{id}', [StudentAssignmentController::class, 'updateSubmission']);
     Route::delete('/submissions/{id}', [StudentAssignmentController::class, 'deleteSubmission']);
+    Route::post('/assignment/save-temporary', [StudentAssignmentController::class, 'saveTemporaryAnswer']);
+    Route::post('/assignment/get-temporary', [StudentAssignmentController::class, 'getTemporarySubmission']);
+    Route::post('/assignment/finalize', [StudentAssignmentController::class, 'finalizeSubmission']);
 });
 Route::prefix('it-courses')->group(function () {
     Route::get('/', [ITCourseController::class, 'index']);
