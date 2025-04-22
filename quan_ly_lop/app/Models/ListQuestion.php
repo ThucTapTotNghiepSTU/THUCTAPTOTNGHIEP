@@ -18,7 +18,7 @@ class ListQuestion extends Model
     protected $fillable = [
         'list_question_id',
         'course_id', // Khoá phụ
-        'lecturer_id', // Thêm lecturer_id vào $fillable
+        'topic',
     ];
 
     public $timestamps = true;
@@ -44,10 +44,7 @@ class ListQuestion extends Model
     {
         return $this->hasMany(Question::class, 'list_question_id');
     }
-
-    // Quan hệ với Lecturer (thêm mối quan hệ với Lecturer)
-    public function lecturer()
-    {
+    public function lecturer() {
         return $this->belongsTo(Lecturer::class, 'lecturer_id');
     }
 }

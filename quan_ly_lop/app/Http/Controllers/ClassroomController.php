@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Helpers\StringHelper;
 
 class ClassroomController extends Controller
 {
@@ -124,5 +125,41 @@ class ClassroomController extends Controller
 
         $classroom->delete();
         return response()->json(['message' => 'Xóa lớp học thành công!'], Response::HTTP_OK);
+    }
+
+    public function search(Request $request)
+    {
+        $query = Classroom::query()
+            ->with(['course', 'lecturer']);
+
+        // Tìm kiếm theo từ khóa
+        if ($request->has('keyword') && !empty($request->keyword)) {
+            $keyword = $request->keyword;
+            $query->where(function($q) use ($keyword) {
+                $q->where('class_code', 'LIKE', "%{$keyword}%")
+                  ->orWhere('class_description', 'LIKE', "%{$keyword}%")
+                  ->orWhereHas('course', function($q) use ($keyword) {
+                      $q->where('course_name', 'LIKE', "%{$keyword}%");
+                  })
+                  ->orWhereHas('lecturer', function($q) use ($keyword) {
+                      $q->where('fullname', 'LIKE', "%{$keyword}%");
+                  });
+            });
+        }
+
+        // Lọc theo trạng thái
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+        // Sắp xếp mặc định theo ngày tạo mới nhất
+        $query->orderBy('created_at', 'desc');
+
+        $classes = $query->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $classes
+        ]);
     }
 }

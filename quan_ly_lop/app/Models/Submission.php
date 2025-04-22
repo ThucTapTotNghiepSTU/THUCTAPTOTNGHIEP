@@ -15,22 +15,25 @@ class Submission extends Model
     protected $primaryKey = 'submission_id';
     public $incrementing = false;
     protected $keyType = 'string';
+    
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'update_at'; // Notice: matches your db column name 'update_at', not 'updated_at'
 
     protected $fillable = [
-        'assignment_id',
         'student_id',
-        'content',
-        'file_path',
-        'submitted_at',
-        'score',
-        'feedback'
+        'exam_id',
+        'assignment_id',
+        'answer_file',
+        'is_late',
+        'temporary_score'
     ];
 
     protected $casts = [
-        'submitted_at' => 'datetime'
+        'is_late' => 'boolean',
+        'temporary_score' => 'float',
+        'created_at' => 'datetime',
+        'update_at' => 'datetime'
     ];
-
-    public $timestamps = true;
 
     protected static function boot()
     {
@@ -58,16 +61,21 @@ class Submission extends Model
 
     public function assignment()
     {
-        return $this->belongsTo(Assignment::class);
-    }
-
-    public function student()
-    {
-        return $this->belongsTo(User::class, 'student_id');
+        return $this->belongsTo(Assignment::class, 'assignment_id');
     }
 
     public function exam()
     {
         return $this->belongsTo(Exam::class, 'exam_id');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(Answer::class, 'submission_id');
     }
 }

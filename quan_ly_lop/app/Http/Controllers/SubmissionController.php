@@ -35,10 +35,10 @@ class SubmissionController extends Controller
     }
 
     // Lấy thông tin một bài nộp
-    public function show(Submission $submission)
+    public function show()
     {
-        $submission->load('student', 'answers');
-        return view('submissions.show', compact('submission'));
+        // Không cần truyền dữ liệu vào view vì dữ liệu sẽ được lấy từ API bằng JavaScript
+        return view('submissions.show');
     }
 
     // Nộp bài

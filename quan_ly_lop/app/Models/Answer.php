@@ -21,7 +21,7 @@ class Answer extends Model
         'question_content',
         'question_answer',
     ];
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected static function boot()
     {

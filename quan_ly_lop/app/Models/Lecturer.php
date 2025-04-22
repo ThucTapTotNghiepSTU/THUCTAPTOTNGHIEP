@@ -28,14 +28,8 @@ class Lecturer extends Authenticatable
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
-
-    // Hàm này để mã hóa mật khẩu khi lưu
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = Hash::make($value);
-    }
-
     // Hàm tạo UUID khi tạo giảng viên mới
     protected static function boot()
     {

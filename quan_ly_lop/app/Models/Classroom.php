@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Helpers\StringHelper;
 
 class Classroom extends Model
 {
@@ -18,6 +19,7 @@ class Classroom extends Model
         'class_id',
         'course_id',  // Khóa phụ
         'lecturer_id', //khoá phụ
+        'student_classes',//khoá phụ
         'class_code',
         'class_description',
         'class_duration',
@@ -29,10 +31,35 @@ class Classroom extends Model
     {
         parent::boot();
 
-        static::creating(function ($class) {
-            $class->class_id = (string) Str::uuid();
+        static::creating(function ($classroom) {
+            $classroom->class_id = (string) Str::uuid();
+            $classroom->updateSearchableText();
+        });
+
+        static::updating(function ($classroom) {
+            $classroom->updateSearchableText();
         });
     }
+
+    protected function updateSearchableText()
+    {
+        $searchableFields = [
+            $this->class_code,
+            $this->class_description,
+            optional($this->course)->course_name,
+            optional($this->lecturer)->fullname
+        ];
+
+        $searchableText = collect($searchableFields)
+            ->filter()
+            ->map(function ($field) {
+                return StringHelper::createSearchableText($field);
+            })
+            ->join(' ');
+
+        $this->searchable_text = $searchableText;
+    }
+
     protected $casts = [
         'class_duration' => 'integer',
     ];
@@ -48,6 +75,7 @@ class Classroom extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
     // Quan hệ với Lecturer
     public function lecturer()
     {

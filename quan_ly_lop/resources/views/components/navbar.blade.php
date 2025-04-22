@@ -47,28 +47,34 @@
         transition: width 0.3s ease;
         -webkit-transition: width 0.3s ease;
     }
+
     .nav-link:hover::after {
         width: 100%;
         left: 0;
         background: #007bff;
     }
+
     .navbar-nav .bi {
         font-size: 1.8rem;
     }
+
     .dropdown-item:hover {
         color: black !important;
         border: 1px solid #007bff;
         cursor: pointer;
     }
+
     .logoutButton {
         color: red !important;
         border: 1px solidrgb(230, 62, 40) !important;
         cursor: pointer;
     }
+
     @media (max-width: 768px) {
         .nav-link {
             font-size: 1rem;
         }
+
         .navbar-nav .bi {
             font-size: 1.5rem;
         }
@@ -122,12 +128,12 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         @auth
-                            <li><a class="dropdown-item" href="{{ route('account') }}">{{ Auth::user()->full_name }}</a>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('account') }}">{{ Auth::user()->fullname }}</a>
                             </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('createQuestion') }}">Tạo bài Thi</a></li>
                             <li><a class="dropdown-item" href="{{ route('createQuestion') }}">Tạo bài Thi</a></li>
                             <li><a class="dropdown-item" href="{{ route('hoanthanh') }}">Hoàn thành</a></li>
                             <li>
@@ -140,7 +146,7 @@
                                 </form>
                             </li>
                         @else
-                            <li><a class="dropdown-item" href="{{ route('login') }}">Đăng nhập</a></li>
+                            <li><a class="dropdown-item" href="{{ route('Showlogin') }}">Đăng nhập</a></li>
                             <li><a class="dropdown-item" href="{{ route('register') }}">Đăng ký</a></li>
                         @endauth
                     </ul>

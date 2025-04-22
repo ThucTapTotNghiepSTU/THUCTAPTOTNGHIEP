@@ -1,9 +1,4 @@
-<?php
-/* $imageUrl = "https://via.placeholder.com/150"; // link ảnh minh hoạ
-$questionSetName = "Bộ câu hỏi ôn tập giữa kỳ";
-$subjectName = "Toán cao cấp";
-$lecturerName = "ThS. Nguyễn Văn A"; */
-?>
+
 <div class="card mb-3 shadow-sm">
     <div class="row g-0">
         <div class="col-md-4">

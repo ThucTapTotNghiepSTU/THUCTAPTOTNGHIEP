@@ -23,8 +23,8 @@ class ClassCard extends Component
         $this->date = $date;
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('components.class-card');
     }
-} 
+}

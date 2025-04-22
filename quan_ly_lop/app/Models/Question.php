@@ -45,5 +45,9 @@ class Question extends Model
     {
         return $this->hasMany(Options::class, 'question_id');
     }
-
+    
+    public function listQuestion()
+    {
+        return $this->belongsTo(ListQuestion::class, 'list_question_id', 'list_question_id');
+    }
 }

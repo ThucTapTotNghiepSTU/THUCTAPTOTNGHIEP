@@ -31,12 +31,6 @@ class Assignment extends Model
         'created_by'
     ];
 
-    protected $casts = [
-        'isSimultaneous' => 'boolean',
-        'show_result' => 'boolean',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
-    ];
     public $timestamps = true;
 
     protected static function boot()
@@ -83,4 +77,5 @@ class Assignment extends Model
     {
         return $this->hasMany(Submission::class);
     }
+
 }

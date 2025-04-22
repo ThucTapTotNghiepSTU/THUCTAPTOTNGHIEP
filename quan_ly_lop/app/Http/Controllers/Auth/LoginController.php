@@ -14,6 +14,9 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
+        if (Auth::check()) {
+            return redirect()->route('homeLoggedIn');
+        }
         return view('auth.login');
     }
     public function login(Request $request)
@@ -41,10 +44,13 @@ class LoginController extends Controller
                         ->withInput($request->except('password'))
                         ->withErrors(['password' => 'Mật khẩu không chính xác.']);
                 }
-                Auth::login($student, $request->filled('remember'));
+                Auth::guard('students')->login($student, $request->filled('remember'));
                 $request->session()->regenerate();
+
+                // Redirect đến trang chủ sinh viên
                 return redirect()->intended('/home')->with('success', 'Xin chào ' . $student->full_name . '!');
             }
+
             // Nếu là giảng viên
             if ($lecturer) {
                 if (!Hash::check($request->password, $lecturer->password)) {
@@ -52,19 +58,22 @@ class LoginController extends Controller
                         ->withInput($request->except('password'))
                         ->withErrors(['password' => 'Mật khẩu không chính xác.']);
                 }
-                \Log::info('Logging in lecturer: ' . $lecturer->fullname);
                 Auth::guard('lecturer')->login($lecturer);
                 $request->session()->regenerate();
-                return redirect()->intended('/home')->with('success', 'Xin chào ' . $lecturer->fullname . '!');
+
+                // Redirect đến trang chủ giảng viên
+                return redirect()->intended('/homeLecturer')->with('success', 'Xin chào ' . $lecturer->fullname . '!');
             }
 
         } catch (\Exception $e) {
+            // Ghi log lỗi
             dd($e->getMessage(), $e->getTraceAsString());
             return back()
                 ->withInput($request->except('password'))
                 ->withErrors(['error' => 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.']);
         }
     }
+
 
     public function logout(Request $request)
     {

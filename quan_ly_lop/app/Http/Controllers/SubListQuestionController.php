@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubListQuestion;
+use App\Models\SubList;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -12,6 +13,15 @@ class SubListQuestionController extends Controller
     public function index()
     {
         return response()->json(SubListQuestion::all());
+    }
+    public function getAll($sublistsId)
+    {
+        $sublist = Sublist::find($sublistsId);
+        if (!$sublist) {
+            return response()->json(['message' => 'Mã đề không tồn tại'], 404);
+        }
+        $questions = $sublist->questions;
+        return response()->json($questions);
     }
 
     // Lấy thông tin chi tiết một SubListQuestion
