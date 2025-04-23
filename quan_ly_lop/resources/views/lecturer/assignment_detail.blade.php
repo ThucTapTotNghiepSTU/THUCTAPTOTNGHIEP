@@ -61,7 +61,7 @@
 
 
     function fetchAssignmentDetail(assignmentId) {
-        fetch(`http://127.0.0.1:8001/api/lecturer-student/assignments/${assignmentId}`)
+        fetch(`/api/lecturer-student/assignments/${assignmentId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -156,8 +156,8 @@
                 <td>${sub.student.full_name} (${sub.student.student_code})</td>
                 <td>${new Date(sub.created_at).toLocaleString()}</td>
                 <td>
-                    ${sub.answer_file ? 
-                    `<a href="#" class="btn btn-sm btn-outline-primary">Tải ${sub.answer_file}</a>` : 
+                    ${sub.answer_file ?
+                    `<a href="#" class="btn btn-sm btn-outline-primary">Tải ${sub.answer_file}</a>` :
                     'Không có file'}
                 </td>
                 <td>${sub.temporary_score}</td>

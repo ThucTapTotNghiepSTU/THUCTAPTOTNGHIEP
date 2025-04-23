@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fetchExamDetail(examId) {
-    fetch(`http://127.0.0.1:8001/api/lecturer-student/exams/${examId}`)
+    fetch(`/api/lecturer-student/exams/${examId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -52,7 +52,7 @@ function fetchExamDetail(examId) {
 function displayExamDetail(data) {
     const exam = data.exam;
     const submissions = data.submissions;
-    
+
     let html = `
         <div class="mb-4">
             <h4>${exam.title}</h4>
@@ -84,7 +84,7 @@ function displayExamDetail(data) {
                         </tr>
                     </thead>
                     <tbody>`;
-    
+
     exam.sub_list.sub_list_questions.forEach(item => {
         const q = item.question;
         html += `
@@ -95,7 +95,7 @@ function displayExamDetail(data) {
                 <td>${q.type}</td>
             </tr>`;
     });
-    
+
     html += `
                     </tbody>
                 </table>
@@ -116,7 +116,7 @@ function displayExamDetail(data) {
                         </tr>
                     </thead>
                     <tbody>`;
-    
+
     submissions.forEach(sub => {
         html += `
             <tr>
@@ -133,7 +133,7 @@ function displayExamDetail(data) {
                     <div class="p-3">
                         <h6>Chi tiết câu trả lời:</h6>
                         <ul class="list-group">`;
-        
+
         sub.answers.forEach(ans => {
             html += `
                 <li class="list-group-item">
@@ -141,20 +141,20 @@ function displayExamDetail(data) {
                     <strong>Trả lời:</strong> ${ans.question_answer}
                 </li>`;
         });
-        
+
         html += `
                         </ul>
                     </div>
                 </td>
             </tr>`;
     });
-    
+
     html += `
                     </tbody>
                 </table>
             </div>
         </div>`;
-    
+
     document.getElementById('exam-detail').innerHTML = html;
 }
 

@@ -19,6 +19,9 @@ use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\StudentAssignmentController;
+use App\Http\Controllers\GradingController;
+use App\Http\Controllers\ClassroomViewController;
 
 
 // ========== ROUTE CÔNG KHAI ==========
@@ -134,3 +137,4 @@ Route::prefix('lecturer')->group(function () {
     Route::get('/exams/{examId}', [LecturerDashboardController::class, 'examDetail'])->name('lecturer.exam.detail');
     Route::get('/assignments/{assignmentId}', [LecturerDashboardController::class, 'assignmentDetail'])->name('lecturer.assignment.detail');
 });
+Route::get('/view/classroom', [ClassroomViewController::class, 'show'])->name('lecturer.classroom.show');
