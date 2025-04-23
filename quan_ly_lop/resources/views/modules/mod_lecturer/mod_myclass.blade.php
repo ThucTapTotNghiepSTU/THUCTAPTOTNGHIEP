@@ -85,8 +85,11 @@
                                 <input type="text" class="form-control" id="courseName" placeholder="Nhập tên khóa học" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="classDuration" class="form-label">Thời gian khóa học</label>
-                                <input type="text" class="form-control" id="classDuration" placeholder="VD: 8 tuần" required>
+                                <label for="courseSelect" class="form-label">Khóa học</label>
+                                <select class="form-control" id="courseSelect" required>
+                                    <option value="">Chọn khóa học</option>
+                                    <!-- Populate with API data -->
+                                </select>
                             </div>
                         </div>
 
@@ -185,28 +188,101 @@
                     return;
                 }
 
-                // Hiển thị thông báo thành công (tạm thời)
-                alert('Đã tạo lớp học: ' + courseName);
+                // Tạo class_code từ tên khóa học và ngày
+                const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const classCode = `${courseName.substring(0, 3).toUpperCase()}${dateStr}${Math.floor(Math.random() * 100)}`;
 
-                // Đóng modal
-                const createModal = bootstrap.Modal.getInstance(document.getElementById('createClassModal'));
-                createModal.hide();
+                // Lấy ID của giảng viên từ meta tag
+                const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
 
-                // Reset form sau khi đóng
-                document.getElementById('createClassForm').reset();
+                // Giả sử course_id là 1 (cần thay đổi logic này để lấy course_id thực tế)
+                // Hoặc thêm dropdown chọn course trong form của bạn
+                const courseId = 1; // Cần thay đổi theo logic thực tế của ứng dụng
 
-                // Hiển thị thông báo thành công trên giao diện (tùy chọn)
-                const notificationHTML = `
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    Tạo lớp học thành công! Lớp học "${courseName}" đã được tạo.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
+                // Chuẩn bị dữ liệu để gửi đến API
+                const classData = {
+                    course_id: courseId,
+                    lecturer_id: lecturerId,
+                    class_code: classCode,
+                    class_description: classDescription,
+                    class_duration: parseInt(classDuration.replace(/\D/g, '')), // Chỉ lấy số từ chuỗi
+                };
 
-                // Chèn thông báo vào đầu container
-                const container = document.querySelector('.container');
-                container.insertAdjacentHTML('afterbegin', notificationHTML);
+                // Gọi API để tạo lớp học
+                const token = localStorage.getItem('token');
+                fetch('/api/classrooms/create', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(classData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Lỗi khi tạo lớp học');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Success:', data);
+
+                        // Đóng modal
+                        const createModal = bootstrap.Modal.getInstance(document.getElementById('createClassModal'));
+                        createModal.hide();
+
+                        // Reset form sau khi đóng
+                        document.getElementById('createClassForm').reset();
+
+                        // Hiển thị thông báo thành công
+                        const notificationHTML = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Tạo lớp học thành công! Lớp học "${courseName}" đã được tạo.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+
+                        // Chèn thông báo vào đầu container
+                        const container = document.querySelector('.container');
+                        container.insertAdjacentHTML('afterbegin', notificationHTML);
+
+                        // Cập nhật danh sách lớp học
+                        fetchClassrooms();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Lỗi khi tạo lớp học: ' + error.message);
+                    });
             });
+        }
+
+        // Hàm để tải lại danh sách lớp học
+        function fetchClassrooms() {
+            const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
+            const token = localStorage.getItem('token');
+
+            fetch(`/api/lecturers/${lecturerId}/classrooms`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Lỗi khi gọi API');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    renderClasses(data.classrooms || []);
+                    window.allClasses = data.classrooms || [];
+                })
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById('dynamic-classes').innerHTML =
+                        '<p class="text-danger">Lỗi khi tải lớp học.</p>';
+                });
         }
     });
 

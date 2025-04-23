@@ -138,37 +138,76 @@
         if (confirmJoinButton) {
             confirmJoinButton.addEventListener('click', function() {
                 const classCode = document.getElementById('classCode').value.trim();
+                const studentId = document.querySelector('meta[name="student_id"]').getAttribute('content');
+                const token = localStorage.getItem('token');
 
                 if (!classCode) {
-                    // Hiển thị thông báo lỗi nếu chưa nhập mã
                     alert('Vui lòng nhập mã lớp học!');
                     return;
                 }
 
-                // Hiển thị thông báo thành công (tạm thời)
-                alert('Đã gửi yêu cầu tham gia lớp học với mã: ' + classCode);
+                // First, fetch the class information using the class code
+                fetch(`/api/classrooms/by-code/${classCode}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Mã lớp học không hợp lệ hoặc không tồn tại');
+                        }
+                        return response.json();
+                    })
+                    .then(classData => {
+                        // Now register the student to this class
+                        return fetch('/api/student-classes/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                student_id: studentId,
+                                class_id: classData.class_id,
+                                status: 'Active',
+                                final_score: null
+                            })
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Không thể tham gia lớp học');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Close modal
+                        const joinModal = bootstrap.Modal.getInstance(document.getElementById('joinClassModal'));
+                        joinModal.hide();
 
-                // Đóng modal
-                const joinModal = bootstrap.Modal.getInstance(document.getElementById('joinClassModal'));
-                joinModal.hide();
+                        // Reset input
+                        document.getElementById('classCode').value = '';
 
-                // Reset input sau khi đóng
-                document.getElementById('classCode').value = '';
-
-                // Hiển thị thông báo thành công trên giao diện (tùy chọn)
-                const notificationHTML = `
-                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                        Đã gửi yêu cầu tham gia lớp học thành công!
+                        // Show success message
+                        const container = document.querySelector('.container');
+                        const alertDiv = document.createElement('div');
+                        alertDiv.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Đã tham gia lớp học thành công!
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 `;
+                        container.insertBefore(alertDiv.firstChild, container.firstChild);
 
-                // Chèn thông báo vào đầu container
-                const container = document.querySelector('.container');
-                const firstChild = container.firstChild;
-                const alertDiv = document.createElement('div');
-                alertDiv.innerHTML = notificationHTML;
-                container.insertBefore(alertDiv.firstChild, firstChild);
+                        // Refresh the class list
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert(error.message || 'Có lỗi xảy ra khi tham gia lớp học');
+                    });
             });
         }
     });

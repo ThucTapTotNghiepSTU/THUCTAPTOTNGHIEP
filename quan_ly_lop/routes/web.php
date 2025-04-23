@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ClassroomViewController;
-use App\Http\Controllers\LecturerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LecturerDashboardController;
 use App\Http\Controllers\LecturerStudentController;
