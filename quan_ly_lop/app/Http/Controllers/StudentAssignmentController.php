@@ -12,6 +12,7 @@ use App\Models\Question;
 use App\Models\Answer;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class StudentAssignmentController extends Controller
 {
@@ -86,77 +87,11 @@ class StudentAssignmentController extends Controller
     /**
      * Submit an assignment or exam
      */
-    public function submitWork(Request $request)
+    public function submitWorkAndAnswers(Request $request)
     {
-        $request->validate([
-            'student_id' => 'required|exists:student,student_id',
-            'exam_id' => 'nullable|exists:exam,exam_id',
-            'assignment_id' => 'nullable|exists:assignment,assignment_id',
-            'answer_file' => 'required|file|max:10240',
-        ]);
+        $answers = json_decode($request->input('answers'), true);
 
-        // Check if only one of exam_id or assignment_id is provided
-        if (
-            (empty($request->exam_id) && empty($request->assignment_id)) ||
-            (!empty($request->exam_id) && !empty($request->assignment_id))
-        ) {
-            return response()->json(['message' => 'A submission must belong to either an Exam or an Assignment, not both.'], 400);
-        }
-
-        // Check if student has already submitted this work
-        $existingSubmission = Submission::where('student_id', $request->student_id)
-            ->where(function ($query) use ($request) {
-                if ($request->has('exam_id')) {
-                    $query->where('exam_id', $request->exam_id);
-                }
-                if ($request->has('assignment_id')) {
-                    $query->where('assignment_id', $request->assignment_id);
-                }
-            })->first();
-
-        if ($existingSubmission) {
-            return response()->json(['message' => 'You have already submitted this work!'], 400);
-        }
-
-        // Store the submitted file
-        $filePath = $request->file('answer_file')->store('submissions');
-
-        // Check if submission is late
-        $isLate = false;
-        $endTime = null;
-
-        if ($request->has('exam_id') && $request->exam_id) {
-            $exam = Exam::find($request->exam_id);
-            $endTime = $exam->end_time;
-        } elseif ($request->has('assignment_id') && $request->assignment_id) {
-            $assignment = Assignment::find($request->assignment_id);
-            $endTime = $assignment->end_time;
-        }
-
-        if ($endTime && now()->greaterThan($endTime)) {
-            $isLate = true;
-        }
-
-        // Create the submission
-        $submission = Submission::create([
-            'submission_id' => Str::random(50), // Generating a unique ID
-            'student_id' => $request->student_id,
-            'exam_id' => $request->exam_id,
-            'assignment_id' => $request->assignment_id,
-            'answer_file' => $filePath,
-            'is_late' => $isLate,
-            'temporary_score' => null,
-            'created_at' => now(),
-        ]);
-
-        return response()->json(['message' => 'Submission successful!', 'submission' => $submission], 201);
-    }
-
-    /**
-     * Submit answers for questions
-     */
-    public function submitAnswers(Request $request)
-    {
+        $request->merge(['answers' => $answers]);
         $request->validate([
             'student_id' => 'required|exists:student,student_id',
             'exam_id' => 'nullable|exists:exam,exam_id',
@@ -164,127 +99,139 @@ class StudentAssignmentController extends Controller
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:question,question_id',
             'answers.*.answer_content' => 'required|string',
-            'is_final_submission' => 'boolean', // Thêm trường để xác định có phải nộp bài cuối cùng không
+            'answer_file' => 'nullable|file|mimes:pdf,docx,txt|max:2048',
         ]);
 
-        // Đảm bảo có ít nhất một trong hai: exam_id hoặc assignment_id
-        if (!$request->exam_id && !$request->assignment_id) {
-            return response()->json(['message' => 'Phải cung cấp exam_id hoặc assignment_id.'], 400);
+        // Kiểm tra xem chỉ có 1 trong 2 ID (exam_id hoặc assignment_id) tồn tại
+        if ((!$request->exam_id && !$request->assignment_id) || ($request->exam_id && $request->assignment_id)) {
+            return response()->json(['message' => 'Bạn phải chọn hoặc bài thi hoặc bài tập, không thể cả hai!'], 400);
         }
 
-        // Kiểm tra sinh viên tồn tại
-        $student = Student::find($request->student_id);
-        if (!$student) {
-            return response()->json(['message' => 'Không tìm thấy sinh viên.'], 404);
-        }
+        $isLate = false;
 
-        // Kiểm tra bài nộp đã tồn tại chưa
-        $submission = Submission::where('student_id', $request->student_id)
-            ->where(function ($query) use ($request) {
-                if ($request->exam_id) {
-                    $query->where('exam_id', $request->exam_id);
-                } else {
-                    $query->where('assignment_id', $request->assignment_id);
-                }
-            })->first();
-
-        // Xử lý khác nhau cho bài kiểm tra và bài tập
-        if ($submission) {
-            // Với bài kiểm tra đã nộp, không cho chỉnh sửa
-            if ($request->exam_id && $submission->exam_id) {
-                $exam = Exam::find($request->exam_id);
-                if ($exam->status === 'Completed') {
-                    return response()->json(['message' => 'Bài kiểm tra đã được nộp và không thể chỉnh sửa.'], 403);
-                }
-            }
-            // Với bài tập, kiểm tra thời hạn
-            elseif ($request->assignment_id && $submission->assignment_id) {
-                $assignment = Assignment::find($request->assignment_id);
-                if (now() > $assignment->end_time) {
-                    return response()->json(['message' => 'Đã quá thời hạn nộp bài tập.'], 403);
-                }
-            }
-        }
-
-        // Nếu bài nộp chưa tồn tại, tạo mới
-        if (!$submission) {
-            $submissionData = [
-                'submission_id' => Str::random(50),
-                'student_id' => $request->student_id,
-                'created_at' => now()
-            ];
-
-            if ($request->exam_id) {
-                $exam = Exam::find($request->exam_id);
-                $submissionData['exam_id'] = $request->exam_id;
-                $submissionData['is_late'] = now() > $exam->end_time;
-            } else {
-                $assignment = Assignment::find($request->assignment_id);
-                $submissionData['assignment_id'] = $request->assignment_id;
-                $submissionData['is_late'] = now() > $assignment->end_time;
-            }
-
-            $submission = Submission::create($submissionData);
-        }
-
-        // Lưu hoặc cập nhật từng câu trả lời
-        foreach ($request->answers as $answerData) {
-            $question = Question::find($answerData['question_id']);
-
-            // Kiểm tra câu trả lời đã tồn tại chưa
-            $existingAnswer = DB::table('answer')
-                ->where('submission_id', $submission->submission_id)
-                ->where('question_title', $question->title)
-                ->first();
-
-            if ($existingAnswer) {
-                // Cập nhật câu trả lời đã tồn tại
-                DB::table('answer')
-                    ->where('answer_id', $existingAnswer->answer_id)
-                    ->update([
-                        'question_answer' => $answerData['answer_content']
-                    ]);
-            } else {
-                // Tạo câu trả lời mới
-                DB::table('answer')->insert([
-                    'answer_id' => Str::random(50),
-                    'submission_id' => $submission->submission_id,
-                    'question_title' => $question->title,
-                    'question_content' => $question->content,
-                    'question_answer' => $answerData['answer_content'],
-                ]);
-            }
-        }
-
-        // Cập nhật thời gian nộp bài
-        $submission->update([
-            'update_at' => now()
-        ]);
-
-        // Nếu là bài nộp cuối cùng và là bài kiểm tra, cập nhật trạng thái
-        if ($request->is_final_submission && $request->exam_id) {
-            Exam::where('exam_id', $request->exam_id)
-                ->update(['status' => 'Completed']);
-
-            return response()->json([
-                'message' => 'Nộp bài kiểm tra thành công! Bài làm của bạn đã được hoàn thành và không thể chỉnh sửa.',
-                'submission_id' => $submission->submission_id
-            ], 201);
-        }
-
-        // Phản hồi khác nhau cho bài tập và bài kiểm tra
         if ($request->exam_id) {
-            return response()->json([
-                'message' => 'Đã lưu câu trả lời bài kiểm tra. Vui lòng nộp bài khi hoàn thành.',
-                'submission_id' => $submission->submission_id
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'Đã lưu câu trả lời bài tập. Bạn có thể tiếp tục chỉnh sửa trong thời hạn nộp bài.',
-                'submission_id' => $submission->submission_id
-            ], 200);
+            $exam = Exam::find($request->exam_id);
+            if ($exam) {
+                $isLate = now()->greaterThan(Carbon::parse($exam->end_time));
+            }
+        } elseif ($request->assignment_id) {
+            $assignment = Assignment::find($request->assignment_id);
+            if ($assignment) {
+                $isLate = now()->greaterThan(Carbon::parse($assignment->end_time));
+            }
         }
+        // Xử lý lưu file nếu có
+        $filePath = null;
+        if ($request->hasFile('answer_file')) {
+            $file = $request->file('answer_file');
+            $filePath = $file->store('submissions', 'public'); // Lưu file vào thư mục 'submissions' (public disk)
+        }
+
+        // Tạo Submission
+        $submission = Submission::create([
+            'submission_id' => Str::random(50), // ID ngẫu nhiên cho submission
+            'student_id' => $request->student_id,
+            'exam_id' => $request->exam_id,
+            'assignment_id' => $request->assignment_id,
+            'answer_file' => $filePath, // Nếu có file đính kèm, xử lý sau
+            'is_late' => $isLate, // Kiểm tra trễ hạn nếu cần
+            'temporary_score' => null,
+            'created_at' => now(),
+        ]);
+
+        // 2. Cập nhật trạng thái bài kiểm tra hoặc bài tập
+        if ($submission->exam_id) {
+            DB::table('exam')
+                ->updateOrInsert(
+                    ['exam_id' => $submission->exam_id],
+                    ['status' => 'Completed', 'updated_at' => now()]
+                );
+        }
+
+        if ($submission->assignment_id) {
+            DB::table('assignment')
+                ->updateOrInsert(
+                    ['assignment_id' => $submission->assignment_id],
+                    ['status' => 'Completed', 'updated_at' => now()]
+                );
+        }
+
+        // Lưu các câu trả lời
+        $correctCount = 0;
+        $total = count($request->answers);
+
+        // Kiểm tra loại bài (exam hay assignment) và lấy type của nó
+        $isExam = false;
+        $isAssignment = false;
+        $examType = null;
+        if ($submission->exam_id) {
+            $exam = Exam::find($submission->exam_id);
+            if ($exam) {
+                $isExam = true;
+                $examType = $exam->type; // Lấy type của exam
+            }
+        } elseif ($submission->assignment_id) {
+            $assignment = Assignment::find($submission->assignment_id);
+            if ($assignment) {
+                $isAssignment = true;
+                $examType = $assignment->type; // Lấy type của assignment
+            }
+        }
+
+        foreach ($request->answers as $answerData) {
+            // Kiểm tra câu hỏi có tồn tại hay không
+            $question = Question::find($answerData['question_id']);
+            if (!$question) {
+                return response()->json(['message' => 'Câu hỏi không tồn tại.'], 400);
+            }
+
+            // Kiểm tra loại bài: nếu là trắc nghiệm, thì chấm điểm
+            if ($examType === 'Trắc nghiệm' && $isExam) {
+                // Kiểm tra câu trả lời đúng cho bài thi trắc nghiệm
+                $isCorrect = $question->options->firstWhere('is_correct', 1)?->option_text === $answerData['answer_content'];
+                if ($isCorrect) {
+                    $correctCount++;
+                }
+            }
+            if ($examType === 'Trắc nghiệm' && $isAssignment) {
+                // Kiểm tra câu trả lời đúng cho bài tập trắc nghiệm
+                $isCorrect = $question->options->firstWhere('is_correct', 1)?->option_text === $answerData['answer_content'];
+                if ($isCorrect) {
+                    $correctCount++;
+                }
+            }
+
+            // Lưu câu trả lời vào bảng Answer
+            Answer::create([
+                'answer_id' => Str::random(50),
+                'submission_id' => $submission->submission_id,
+                'question_title' => $question->title,
+                'question_content' => $question->content,
+                'question_answer' => $answerData['answer_content'],
+            ]);
+        }
+
+        // Nếu là bài thi trắc nghiệm, tính điểm và cập nhật vào submission
+        if ($examType === 'Trắc nghiệm' && $isExam) {
+            $score = round(($correctCount / $total) * 10, 2);
+            $submission->update(['temporary_score' => $score]);
+        }
+
+        if ($examType === 'Trắc nghiệm' && $isAssignment) {
+            $score = round(($correctCount / $total) * 10, 2);
+            $submission->update(['temporary_score' => $score]);
+        }
+
+        return response()->json([
+            'message' => 'Nộp bài thành công!',
+            'score' => $examType === 'Trắc nghiệm' ? $score : null, // Chỉ trả về điểm nếu là bài thi trắc nghiệm
+            'correct' => $correctCount,
+            'total' => $total
+        ], 201);
     }
+
+
+
 
     /**
      * Get submission status for a student

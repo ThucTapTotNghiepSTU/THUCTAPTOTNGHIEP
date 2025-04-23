@@ -28,17 +28,21 @@ class AssignmentController extends Controller
      */
     public function show($id)
     {
+        // Load assignment with nested relationships for questions and options
         $assignments = Assignment::with([
             'subList.subListQuestions.question.options'
         ])->find($id);
 
+        // Check if the assignment exists
         if (!$assignments) {
             return response()->json(['message' => 'Bài thi không tồn tại!'], Response::HTTP_NOT_FOUND);
         }
 
+        // Map questions based on the assignment type (Multiple choice or others)
         $questions = $assignments->subList->subListQuestions->map(function ($item) use ($assignments) {
             $question = $item->question;
 
+            // If it's a multiple-choice question
             if ($assignments->type === 'Trắc nghiệm') {
                 return [
                     'question_id' => $question->question_id,
@@ -48,6 +52,7 @@ class AssignmentController extends Controller
                     }),
                 ];
             } else {
+                // If it's not a multiple-choice question (e.g., essay or short answer)
                 return [
                     'question_id' => $question->question_id,
                     'content'     => $question->content,
@@ -55,13 +60,18 @@ class AssignmentController extends Controller
             }
         });
 
+        // Return the assignment data with questions
         return response()->json([
-            'assignments_id'   => $assignments->assignments_id,
-            'title'     => $assignments->title,
-            'type'      => $assignments->type,
-            'questions' => $questions,
+            'assignment_id'   => $assignments->assignment_id,
+            'title'           => $assignments->title,
+            'type'            => $assignments->type,
+            'start_time'      => $assignments->start_time,
+            'end_time'        => $assignments->end_time,
+            'isSimultaneous'  => $assignments->isSimultaneous,
+            'questions'       => $questions,
         ]);
     }
+
 
     /**
      * Hiển thị form tạo mới bài tập
@@ -116,7 +126,7 @@ class AssignmentController extends Controller
             'isSimultaneous' => 'required|integer|in:0,1',
             'start_time' => 'nullable|date',
             'end_time' => 'nullable|date|after_or_equal:start_time',
-            'show_result' =>  'required|boolean'  ,
+            'show_result' =>  'required|boolean',
             'status' => 'required|string|in:' . implode(',', Assignment::getAllowedStatuses()),
         ]);
 
@@ -133,17 +143,17 @@ class AssignmentController extends Controller
             'status' => $request->status,
         ]);
         $students = DB::table('assignment')
-        ->join('sub_list','assignment.sub_list_id','=','sub_list.sub_list_id')
-        ->join('sub_list_question', 'sub_list.sub_list_id', '=', 'sub_list_question.sub_list_id')
-        ->join('question', 'sub_list_question.question_id', '=', 'question.question_id')
-        ->join('list_question', 'question.list_question_id', '=', 'list_question.list_question_id')
-        ->join('classroom', 'list_question.course_id', '=', 'classroom.course_id')
-        ->join('student_class', 'classroom.class_id', '=', 'student_class.class_id')
-        ->join('student', 'student_class.student_id', '=', 'student.student_id')
-        ->where('assignment.assignment_id', $assignment->assignment_id)
-        ->select('student.full_name', 'student.school_email')
-        ->distinct()
-        ->get();
+            ->join('sub_list', 'assignment.sub_list_id', '=', 'sub_list.sub_list_id')
+            ->join('sub_list_question', 'sub_list.sub_list_id', '=', 'sub_list_question.sub_list_id')
+            ->join('question', 'sub_list_question.question_id', '=', 'question.question_id')
+            ->join('list_question', 'question.list_question_id', '=', 'list_question.list_question_id')
+            ->join('classroom', 'list_question.course_id', '=', 'classroom.course_id')
+            ->join('student_class', 'classroom.class_id', '=', 'student_class.class_id')
+            ->join('student', 'student_class.student_id', '=', 'student.student_id')
+            ->where('assignment.assignment_id', $assignment->assignment_id)
+            ->select('student.full_name', 'student.school_email')
+            ->distinct()
+            ->get();
 
         $mailFailed = false;
 

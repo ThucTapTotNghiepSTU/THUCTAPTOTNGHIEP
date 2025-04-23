@@ -19,6 +19,7 @@
                 <div id="assignment-container"></div>
             </div>
         </div>
+
     </div>
 
     @auth
@@ -42,7 +43,7 @@
             console.log("Không tìm thấy dữ liệu course_id và lecturer_id.");
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             getCourseInfo(courseId);
             getLecturerInfo(lecturerId);
             getAllStudentTasksOfCourse(studentId, courseId);
@@ -109,7 +110,6 @@
             try {
                 const res = await fetch(`/api/getAllStudentTasksOfCourse/${studentId}/${courseId}`);
                 const data = await res.json();
-
                 const examContainer = document.getElementById('exam-container');
                 const assignmentContainer = document.getElementById('assignment-container');
 
@@ -119,61 +119,88 @@
                 data.exams.forEach(exam => {
                     const isPending = exam.status === 'Pending';
                     const badgeColor = isPending ? 'warning text-dark' : 'success';
-                    const showButton = isPending;
+                    const hasScore = exam.temporary_score != null; // Kiểm tra xem bài đã có điểm chưa
+                    const isSimultaneous = exam.isSimultaneous === true || exam.isSimultaneous === 1;
+
+                    const now = new Date();
+                    const startTime = new Date(exam.start_time);
+                    const endTime = new Date(exam.end_time);
+
+                    let endTimeBonus = endTime;
+                    if (!isSimultaneous) {
+                        endTimeBonus = new Date(endTime); // clone
+                        endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 ngày
+                    }
+                    const showButton = isPending && now >= startTime && now <= endTimeBonus;
+
 
                     examContainer.innerHTML += `
-                        <div class="card shadow-sm border-0 mb-4">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h5 class="mb-1"><i class="bi bi-journal-check me-2 text-primary"></i>${exam.title}</h5>
-                                        <p class="text-muted mb-2">${exam.content}</p>
-                                    </div>
-                                    <span class="badge rounded-pill bg-${badgeColor}">${exam.status}</span>
-                                </div>
-                                <ul class="list-unstyled mb-3">
-                                    <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${exam.type}</li>
-                                    <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${exam.start_time}</li>
-                                    <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
-                                </ul>
-                                ${showButton ? `
-                                    <a href="/task/start?id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
-                                        <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
-                                    </a>` : ''
-                                }
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-1"><i class="bi bi-journal-check me-2 text-primary"></i>${exam.title}</h5>
+                                <p class="text-muted mb-2">${exam.content}</p>
                             </div>
+                            <span class="badge rounded-pill bg-${badgeColor}">${exam.status}</span>
                         </div>
-                    `;
+                        <ul class="list-unstyled mb-3">
+                            <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${exam.type}</li>
+                            <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${exam.start_time}</li>
+                            <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
+                        </ul>
+                        ${showButton ? `
+                                            <a href="/task/start?id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
+                                                <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
+                                            </a>` : ''}
+                        ${hasScore ? `
+                                            <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
+                    </div>
+                </div>
+            `;
                 });
 
                 data.assignments.forEach(assign => {
                     const isPending = assign.status === 'Pending';
                     const badgeColor = isPending ? 'warning text-dark' : 'success';
-                    const showButton = isPending;
+                    const hasScore = assign.temporary_score != null; // Kiểm tra xem bài đã có điểm chưa
+                    const isSimultaneous = assign.isSimultaneous === true || assign.isSimultaneous === 1;
+
+                    const now = new Date();
+                    const startTime = new Date(assign.start_time);
+                    const endTime = new Date(assign.end_time);
+
+                    let endTimeBonus = endTime;
+                    if (!isSimultaneous) {
+                        endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 ngày
+                    }
+
+                    const showButton = isPending && now >= startTime && now <= endTimeBonus;
 
                     assignmentContainer.innerHTML += `
-                        <div class="card shadow-sm border-0 mb-4">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h5 class="mb-1"><i class="bi bi-clipboard-data me-2 text-info"></i>${assign.title}</h5>
-                                        <p class="text-muted mb-2">${assign.content}</p>
-                                    </div>
-                                    <span class="badge rounded-pill bg-${badgeColor}">${assign.status}</span>
-                                </div>
-                                <ul class="list-unstyled mb-3">
-                                    <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${assign.type}</li>
-                                    <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${assign.start_time}</li>
-                                    <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
-                                </ul>
-                                ${showButton ? `
-                                    <a href="/task/start?id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
-                                        <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
-                                    </a>` : ''
-                                }
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="mb-1"><i class="bi bi-clipboard-data me-2 text-info"></i>${assign.title}</h5>
+                                <p class="text-muted mb-2">${assign.content}</p>
                             </div>
+                            <span class="badge rounded-pill bg-${badgeColor}">${assign.status}</span>
                         </div>
-                    `;
+                        <ul class="list-unstyled mb-3">
+                            <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${assign.type}</li>
+                            <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${assign.start_time}</li>
+                            <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
+                        </ul>
+                        ${showButton ? `
+                                            <a href="/task/start?id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
+                                                <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
+                                            </a>` : ''}
+                        ${hasScore ? `
+                                            <div class="mt-3"><strong>Điểm:</strong> ${assign.temporary_score}</div>` : ''}
+                    </div>
+                </div>
+            `;
                 });
             } catch (err) {
                 console.error("Lỗi khi tải bài kiểm tra và bài tập:", err);
