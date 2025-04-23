@@ -20,7 +20,9 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\StudentAssignmentController;
-use App\Http\Controllers\StudentTaskController;
+use App\Http\Controllers\GradingController;
+use App\Http\Controllers\ClassroomViewController;
+
 
 // ========== ROUTE CÔNG KHAI ==========
 Route::get('/', function () {
@@ -113,22 +115,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/submissions', [SubmissionController::class, 'index'])->name('submissions.index');
     Route::get('/submissions/{submission}', [SubmissionController::class, 'show'])->name('submissions.show');
     Route::post('/submissions/{submission}/grade', [SubmissionController::class, 'grade'])->name('submissions.grade');
-    // làm bài
 
-    Route::get('/task/start', [StudentTaskController::class, 'redirectToProperPage']);
-    Route::get('/essay', function () {
-        return view('essay'); // hoặc gọi controller nếu bạn muốn render từ backend
-    })->name('essay.page');
-
-    Route::get('/quiz', function () {
-        return view('quiz');
-    })->name('quiz.page');
-
-    Route::get('/classDetail', function () {
-        return view('show_class');
-    });
-    Route::get('/getCourseOfStudent/{student_id}', [CourseController::class, 'showCourseOfStudent'])->name('showCourseOfStudent');
-
+    // Grading routes
+    Route::post('/submissions/{submission_id}/grade', [GradingController::class, 'gradeSubmission'])->name('submissions.grade');
+    Route::post('/submissions/{submission_id}/manual-grade', [GradingController::class, 'updateManualGrades'])->name('submissions.manual-grade');
 });
 
 // ========== ROUTE DÀNH RIÊNG CHO GIẢNG VIÊN ==========
@@ -156,3 +146,4 @@ Route::prefix('lecturer')->group(function () {
     Route::get('/exams/{examId}', [LecturerDashboardController::class, 'examDetail'])->name('lecturer.exam.detail');
     Route::get('/assignments/{assignmentId}', [LecturerDashboardController::class, 'assignmentDetail'])->name('lecturer.assignment.detail');
 });
+Route::get('/view/classroom', [ClassroomViewController::class, 'show'])->name('lecturer.classroom.show');

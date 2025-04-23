@@ -28,26 +28,89 @@
                 </div>
             </div>
 
-            <!-- Thanh tìm kiếm và lọc -->
-            <div class="search-filter-container mb-4">
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <div class="input-group">
-                            <input type="text" class="form-control search-input" placeholder="Tìm kiếm lớp học..."
-                                id="searchInput">
-                            <button class="btn btn-primary">
-                                <i class="fas fa-search"></i>
-                            </button>
+    <!-- Thanh tìm kiếm và lọc -->
+    <div class="search-filter-card card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="form-control search-input"
+                            placeholder="Tìm kiếm lớp học...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select id="statusSelect" class="form-select custom-select">
+                        <option value="">Trạng thái</option>
+                        <option value="Đang học">Đang học</option>
+                        <option value="Đã hoàn thành">Đã hoàn thành</option>
+                        <option value="Tất cả">Tất cả</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="sortSelect" class="form-select custom-select">
+                        <option value="">Sắp xếp theo</option>
+                        <option value="newest">Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                        <option value="name_asc">Tên A-Z</option>
+                        <option value="name_desc">Tên Z-A</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-success" id="createClassButton" data-bs-toggle="modal" data-bs-target="#createClassModal">
+                        <i class="fas fa-plus-circle me-2"></i>Tạo lớp học
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Tạo Lớp Học -->
+    <div class="modal fade" id="createClassModal" tabindex="-1" aria-labelledby="createClassModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createClassModalLabel">Tạo lớp học mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createClassForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="courseName" class="form-label">Tên khóa học</label>
+                                <input type="text" class="form-control" id="courseName" placeholder="Nhập tên khóa học" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="classDuration" class="form-label">Thời gian khóa học</label>
+                                <input type="text" class="form-control" id="classDuration" placeholder="VD: 8 tuần" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-select">
-                            <option selected>Tất cả lớp học</option>
-                            <option>Đang diễn ra</option>
-                            <option>Sắp khai giảng</option>
-                            <option>Đã kết thúc</option>
-                        </select>
-                    </div>
+
+                        <div class="mb-3">
+                            <label for="classDescription" class="form-label">Mô tả lớp học</label>
+                            <textarea class="form-control" id="classDescription" rows="3" placeholder="Mô tả ngắn về lớp học"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Ngày bắt đầu</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">Ngày kết thúc</label>
+                                <input type="date" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="classImage" class="form-label">Ảnh bìa lớp học</label>
+                            <input type="file" class="form-control" id="classImage" accept="image/*">
+                            <div class="form-text">Tải lên hình ảnh đại diện cho lớp học (không bắt buộc).</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="confirmCreateClass">Tạo lớp học</button>
                 </div>
             </div>
 
@@ -81,11 +144,11 @@
         <meta name="lecturer-id" content="{{ Auth::user()->lecturer_id }}">
     @endauth
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
-            const token = localStorage.getItem('token');
-            fetch(`/api/lecturers/${lecturerId}/classrooms`, {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
+        const token = localStorage.getItem('token');
+        fetch(`/api/lecturers/${lecturerId}/classrooms`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -159,9 +222,9 @@
                 `;
             });
 
-            container.innerHTML = html;
-            attachJoinHandlers();
-        }
+        container.innerHTML = html;
+        attachJoinHandlers();
+    }
 
         function attachJoinHandlers() {
             const joinButtons = document.querySelectorAll('.join-button');
@@ -214,237 +277,237 @@
             color: white;
         }
 
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 20px;
-        }
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+    }
 
-        /* Stats Cards */
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+    /* Stats Cards */
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
 
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
 
-        .bg-primary-soft {
-            background: rgba(0, 97, 242, 0.1);
-        }
+    .bg-primary-soft {
+        background: rgba(0, 97, 242, 0.1);
+    }
 
-        .bg-success-soft {
-            background: rgba(40, 167, 69, 0.1);
-        }
+    .bg-success-soft {
+        background: rgba(40, 167, 69, 0.1);
+    }
 
-        .bg-info-soft {
-            background: rgba(23, 162, 184, 0.1);
-        }
+    .bg-info-soft {
+        background: rgba(23, 162, 184, 0.1);
+    }
 
-        .bg-warning-soft {
-            background: rgba(255, 193, 7, 0.1);
-        }
+    .bg-warning-soft {
+        background: rgba(255, 193, 7, 0.1);
+    }
 
-        .stat-info h3 {
-            font-size: 24px;
-            font-weight: 600;
-            margin: 0;
-            color: #333;
-        }
+    .stat-info h3 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
 
-        .stat-info p {
-            margin: 0;
-            color: #6c757d;
-            font-size: 14px;
-        }
+    .stat-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
 
-        /* Search and Filter */
-        .search-filter-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
-        }
+    /* Search and Filter */
+    .search-filter-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
+    }
 
-        .search-box {
-            position: relative;
-        }
+    .search-box {
+        position: relative;
+    }
 
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-        }
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
 
-        .search-input {
-            padding-left: 45px;
-            border-radius: 10px;
-            border: 1px solid #e0e0e0;
-        }
+    .search-input {
+        padding-left: 45px;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+    }
 
-        .custom-select {
-            border-radius: 10px;
-            border: 1px solid #e0e0e0;
-        }
+    .custom-select {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+    }
 
-        /* Class Cards */
-        .class-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
-            transition: transform 0.3s ease;
-        }
+    /* Class Cards */
+    .class-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(33, 40, 50, 0.15);
+        transition: transform 0.3s ease;
+    }
 
-        .class-card:hover {
-            transform: translateY(-5px);
-        }
+    .class-card:hover {
+        transform: translateY(-5px);
+    }
 
-        .class-card-header {
-            position: relative;
-        }
+    .class-card-header {
+        position: relative;
+    }
 
-        .class-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
+    .class-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
 
-        .status-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: white;
-            font-size: 12px;
-        }
+    .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 8px 15px;
+        border-radius: 20px;
+        color: white;
+        font-size: 12px;
+    }
 
-        .badge-success {
-            background: #28a745;
-        }
+    .badge-success {
+        background: #28a745;
+    }
 
-        .badge-secondary {
-            background: #6c757d;
-        }
+    .badge-secondary {
+        background: #6c757d;
+    }
 
-        .class-card-body {
-            padding: 20px;
-        }
+    .class-card-body {
+        padding: 20px;
+    }
 
-        .class-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-        }
+    .class-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
 
-        .class-description {
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
+    .class-description {
+        color: #6c757d;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
 
-        .class-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
+    .class-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
 
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #6c757d;
-            font-size: 14px;
-        }
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #6c757d;
+        font-size: 14px;
+    }
 
-        .progress-section {
-            margin-bottom: 15px;
-        }
+    .progress-section {
+        margin-bottom: 15px;
+    }
 
-        .progress {
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            margin-bottom: 5px;
-        }
+    .progress {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
 
-        .progress-bar {
-            background: linear-gradient(135deg, #0061f2 0%, #6610f2 100%);
-            border-radius: 4px;
-        }
+    .progress-bar {
+        background: linear-gradient(135deg, #0061f2 0%, #6610f2 100%);
+        border-radius: 4px;
+    }
 
-        .progress-text {
-            font-size: 12px;
-            color: #6c757d;
-        }
+    .progress-text {
+        font-size: 12px;
+        color: #6c757d;
+    }
 
-        .score-section {
-            margin-bottom: 15px;
-        }
+    .score-section {
+        margin-bottom: 15px;
+    }
 
-        .score-badge {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            padding: 10px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .score-badge {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        .score-value {
-            font-weight: 600;
-            font-size: 16px;
-        }
+    .score-value {
+        font-weight: 600;
+        font-size: 16px;
+    }
 
-        .class-actions {
-            margin-top: 20px;
-        }
+    .class-actions {
+        margin-top: 20px;
+    }
 
-        .btn-enter,
-        .btn-review {
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 500;
-        }
+    .btn-enter,
+    .btn-review {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 500;
+    }
 
-        .section-title {
-            color: #333;
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 10px;
-        }
+    .section-title {
+        color: #333;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 10px;
+    }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(135deg, #0061f2 0%, #6610f2 100%);
-            border-radius: 3px;
-        }
-    </style>
+    .section-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(135deg, #0061f2 0%, #6610f2 100%);
+        border-radius: 3px;
+    }
+</style>
 @endsection
