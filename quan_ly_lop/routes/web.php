@@ -29,10 +29,7 @@ use App\Http\Controllers\StudentTaskController;
 
 // ========== ROUTE CÔNG KHAI ==========
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 Route::get('/submission/show', [SubmissionController::class, 'show'])->name('submissions.show');
-
-
 // ========== ROUTE CHO GUEST ==========
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('Showlogin');

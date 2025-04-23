@@ -77,7 +77,7 @@ class SubListController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string',
             'isShuffle' => 'required|boolean',
-            'list_question_id' => 'required|exists:list_question,list_question_id',
+            /* 'list_question_id' => 'required|exists:list_question,list_question_id', */
             'question_ids' => 'required|array', // Danh sách question_id
             'question_ids.*' => 'exists:question,question_id', // Kiểm tra từng ID
         ]);

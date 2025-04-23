@@ -107,6 +107,7 @@ Route::prefix('list-questions')->group(function () {
     Route::delete('/delete/{id}', [ListQuestionController::class, 'destroy']);
     Route::get('/{lecturer_id}', [ListQuestionController::class, 'getAllListQuestionsWithLecturer']);
     Route::get('/topics/{course_id}', [ListQuestionController::class, 'getTopicsByCourse']);
+    Route::get('/questions/by-course-topic', [ListQuestionController::class, 'getQuestionsByCourseAndTopic']);
 });
 
 // API cho Options
