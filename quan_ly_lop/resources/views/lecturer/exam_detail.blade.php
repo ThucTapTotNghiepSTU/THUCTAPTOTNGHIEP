@@ -1,13 +1,13 @@
-@extends('layouts.app')
+@extends('templates.template_lecture')
 
-@section('content')
+@section('main-content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3>Chi tiết bài kiểm tra</h3>
-                    <a href="{{ route('lecturer.dashboard') }}" class="btn btn-sm btn-secondary">Quay lại</a>
+                    <a href="/classDetail" class="btn btn-sm btn-secondary">Quay lại</a>
                 </div>
                 <div class="card-body">
                     <div id="exam-detail">

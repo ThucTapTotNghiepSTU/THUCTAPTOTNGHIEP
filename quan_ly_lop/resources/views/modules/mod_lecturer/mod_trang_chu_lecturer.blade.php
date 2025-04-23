@@ -1,32 +1,32 @@
 @extends('templates.template_lecture')
 @section('main-content')
-    <div class="container py-4">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @auth
-            <!-- Thông tin người dùng -->
-            <div class="profile-header card mb-4 mx-auto">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <div class="avatar-circle">
-                                <i class="fas fa-user-graduate fa-3x text-white"></i>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <p class="text-light mb-0">
-                                <i class="fas fa-id-card me-2"></i>@if(Auth::guard('lecturer')->check())
-                                    Xin chào giảng viên {{ Auth::guard('lecturer')->user()->fullname }}
-                                @endif
-                            </p>
-                        </div>
+<div class="container py-4">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    @auth
+    <!-- Thông tin người dùng -->
+    <div class="profile-header card mb-4 mx-auto">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="avatar-circle">
+                        <i class="fas fa-user-graduate fa-3x text-white"></i>
                     </div>
                 </div>
+                <div class="col">
+                    <p class="text-light mb-0">
+                        <i class="fas fa-id-card me-2"></i>@if(Auth::guard('lecturer')->check())
+                        Xin chào giảng viên {{ Auth::guard('lecturer')->user()->fullname }}
+                        @endif
+                    </p>
+                </div>
             </div>
+        </div>
+    </div>
 
     <!-- Thanh tìm kiếm và lọc -->
     <div class="search-filter-card card mb-4">
@@ -113,36 +113,37 @@
                     <button type="button" class="btn btn-primary" id="confirmCreateClass">Tạo lớp học</button>
                 </div>
             </div>
-
-            <!-- Thống kê lớp học -->
-            <div class="d-flex flex-column justify-content-start ">
-                <h3 class="section-title mb-4">Lớp học hiện có</h3>
-                <div class="row justify-content-start" id="dynamic-classes">
-                </div>
-            </div>
-        @else
-            <!-- Trang chào mừng cho khách -->
-            <div class="welcome-container text-center py-5">
-                <div class="welcome-icon mb-4">
-                    <i class="fas fa-graduation-cap fa-4x text-primary"></i>
-                </div>
-                <h2 class="welcome-title mb-3">Chào mừng đến với hệ thống quản lý lớp học</h2>
-                <p class="welcome-text mb-4">Đăng nhập để trải nghiệm đầy đủ các tính năng của hệ thống.</p>
-                <div class="welcome-buttons">
-                    <a href="{{ route('Showlogin') }}" class="btn btn-primary btn-lg me-3">
-                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
-                    </a>
-                    <!--                     <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg">
-                                                                <i class="fas fa-user-plus me-2"></i>Đăng ký
-                                                            </a> -->
-                </div>
-            </div>
-        @endauth
+        </div>
     </div>
-    @auth
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <meta name="lecturer-id" content="{{ Auth::user()->lecturer_id }}">
+    <!-- Thống kê lớp học -->
+    <div class="d-flex flex-column justify-content-start ">
+        <h3 class="section-title mb-4">Lớp học hiện có</h3>
+        <div class="row justify-content-start" id="dynamic-classes">
+        </div>
+    </div>
+    @else
+    <!-- Trang chào mừng cho khách -->
+    <div class="welcome-container text-center py-5">
+        <div class="welcome-icon mb-4">
+            <i class="fas fa-graduation-cap fa-4x text-primary"></i>
+        </div>
+        <h2 class="welcome-title mb-3">Chào mừng đến với hệ thống quản lý lớp học</h2>
+        <p class="welcome-text mb-4">Đăng nhập để trải nghiệm đầy đủ các tính năng của hệ thống.</p>
+        <div class="welcome-buttons">
+            <a href="{{ route('Showlogin') }}" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+            </a>
+            <!--                     <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg">
+                                                        <i class="fas fa-user-plus me-2"></i>Đăng ký
+                                                    </a> -->
+        </div>
+    </div>
     @endauth
+</div>
+@auth
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="lecturer-id" content="{{ Auth::user()->lecturer_id }}">
+@endauth
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -151,131 +152,176 @@
         fetch(`/api/lecturers/${lecturerId}/classrooms`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+                    'Authorization': `Bearer ${token}`
                 }
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    renderClasses(data.classrooms || []);
-                    window.allClasses = data.classrooms || [];
-                    searchBox();
-                })
-                .catch(error => {
-                    console.error('Lỗi khi tải lớp học:', error);
-                    document.getElementById('dynamic-classes').innerHTML =
-                        '<p class="text-danger">Lỗi khi tải lớp học.</p>';
-                });
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Lỗi khi gọi API');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Nếu bạn trả về object {lecturer_id, fullname, classrooms: [...]}
+                renderClasses(data.classrooms || []);
+                window.allClasses = data.classrooms || [];
+                searchBox();
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('dynamic-classes').innerHTML =
+                    '<p class="text-danger">Lỗi khi tải lớp học.</p>';
+            });
+        // Xử lý sự kiện nút xác nhận tạo lớp học
+        const confirmCreateButton = document.getElementById('confirmCreateClass');
+        if (confirmCreateButton) {
+            confirmCreateButton.addEventListener('click', function() {
+                // Lấy dữ liệu từ form
+                const courseName = document.getElementById('courseName').value.trim();
+                const classDuration = document.getElementById('classDuration').value.trim();
+                const classDescription = document.getElementById('classDescription').value.trim();
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
 
-        function renderClasses(data) {
-            const container = document.getElementById('dynamic-classes');
-            const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
+                // Kiểm tra các trường bắt buộc
+                if (!courseName || !classDuration || !startDate || !endDate) {
+                    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                    return;
+                }
 
-            if (data.length === 0) {
-                container.innerHTML = '<p class="text-muted">Không có lớp học nào.</p>';
-                return;
-            }
+                // Kiểm tra ngày kết thúc phải sau ngày bắt đầu
+                if (new Date(endDate) <= new Date(startDate)) {
+                    alert('Ngày kết thúc phải sau ngày bắt đầu!');
+                    return;
+                }
 
-            let html = '';
-            data.forEach(classItem => {
-                html += `
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="class-card card h-100">
-                            <div class="class-card-header">
-                                <img src="${classItem.image || 'images/header_image/default-class.jpg'}" class="class-image" alt="${classItem.course?.course_name || 'Lớp học'}">
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <p class="card-author mb-0">
-                                        <i class="fas fa-chalkboard-teacher me-2"></i>Bạn
-                                    </p>
+                // Hiển thị thông báo thành công (tạm thời)
+                alert('Đã tạo lớp học: ' + courseName);
+
+                // Đóng modal
+                const createModal = bootstrap.Modal.getInstance(document.getElementById('createClassModal'));
+                createModal.hide();
+
+                // Reset form sau khi đóng
+                document.getElementById('createClassForm').reset();
+
+                // Hiển thị thông báo thành công trên giao diện (tùy chọn)
+                const notificationHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    Tạo lớp học thành công! Lớp học "${courseName}" đã được tạo.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+                // Chèn thông báo vào đầu container
+                const container = document.querySelector('.container');
+                container.insertAdjacentHTML('afterbegin', notificationHTML);
+            });
+        }
+    });
+
+    function renderClasses(data) {
+        const container = document.getElementById('dynamic-classes');
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted">Không có lớp học nào.</p>';
+            return;
+        }
+
+        let html = '';
+        data.forEach(classItem => {
+            html += `
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="class-card card h-100">
+                                <div class="class-card-header">
+                                    <img src="${classItem.image || 'images/header_image/default-class.jpg'}" class="class-image" alt="${classItem.course?.course_name || 'Lớp học'}">
                                 </div>
-                                <h5 class="card-title">${classItem.course?.course_name || 'Tên lớp'}</h5>
-                                <p class="card-text text-muted">${classItem.class_description || 'Không có mô tả'}</p>
-                                <div class="class-info">
-                                    <div class="info-item">
-                                        <i class="fas fa-users me-2"></i>
-                                        <span>${classItem.studentClasses?.length || 0}</span>
+
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <p class="card-author mb-0">
+                                            <i class="fas fa-chalkboard-teacher me-2"></i>Bạn
+                                        </p>
                                     </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-calendar-alt me-2"></i>
-                                        <span>${classItem.class_duration || 'N/A'}</span>
+                                    <h5 class="card-title">${classItem.course?.course_name || 'Tên lớp'}</h5>
+                                    <p class="card-text text-muted">${classItem.class_description || 'Không có mô tả'}</p>
+
+                                    <div class="class-info">
+                                        <div class="info-item">
+                                            <i class="fas fa-users me-2"></i>
+                                            <span>${classItem.studentClasses?.length || 0}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            <span>${classItem.class_duration || 'N/A'}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="mt-3">
-                                    <button class="btn btn-outline-primary w-100 join-button"
-                                        data-class-id="${classItem.class_id}"
-                                        data-course-id="${classItem.course?.course_id || ''}"
-                                        data-lecturer-id="${lecturerId}">
-                                        <i class="fas fa-eye me-2"></i>Xem chi tiết
-                                    </button>
+
+                                    <div class="mt-3">
+                                        <button class="btn btn-outline-primary w-100 join-button"
+                                            data-class-id="${classItem.class_id}">
+                                            <i class="fas fa-eye me-2"></i>Xem chi tiết
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+        });
 
         container.innerHTML = html;
         attachJoinHandlers();
     }
 
-        function attachJoinHandlers() {
-            const joinButtons = document.querySelectorAll('.join-button');
-            joinButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const courseId = this.getAttribute('data-course-id') || null;
-                    const lecturerId = this.getAttribute('data-lecturer-id') || null;
-                    const classId = this.getAttribute('data-class-id') || null;
+    function attachJoinHandlers() {
+        const joinButtons = document.querySelectorAll('.join-button'); // Tìm tất cả nút có class 'join-button'
 
-                    if (!classId) {
-                        console.error('Thiếu class_id');
-                        return;
-                    }
+        joinButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Lấy thông tin từ thuộc tính data-* của nút
+                const courseId = this.getAttribute('data-course-id');
+                const lecturerId = this.getAttribute('data-lecturer-id');
+                const classId = this.getAttribute('data-class-id');
 
-                    const listId = {
-                        course_id: courseId,
-                        lecturer_id: lecturerId,
-                        class_id: classId
-                    };
+                // Tạo một object chứa các ID này
+                const listId = {
+                    course_id: courseId,
+                    lecturer_id: lecturerId,
+                    class_id: classId
+                };
 
-                    console.log('Lưu localStorage:', listId);
-                    localStorage.setItem("list_id_course_lecturer", JSON.stringify(listId));
-                    window.location.href = "/classDetail";
-                });
+                // Lưu object đó vào localStorage dưới tên "list_id_course_lecturer"
+                localStorage.setItem("list_id_course_lecturer", JSON.stringify(listId));
+
+                // Chuyển hướng đến trang chi tiết lớp học
+                window.location.href = "/view/classroom";
             });
-        }
+        });
+    }
 
-        function removeVietnameseTones(str) {
-            return str.normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-                .replace(/đ/g, 'd').replace(/Đ/g, 'D');
-        }
-        function searchBox() {
-            document.getElementById('searchInput').addEventListener('input', function () {
-                const keyword = removeVietnameseTones(this.value.toLowerCase());
-                const filtered = window.allClasses.filter(classItem =>
-                    removeVietnameseTones(classItem.course_name.toLowerCase()).includes(keyword)
-                );
-                renderClasses(filtered);
-            });
-        }
+    function removeVietnameseTones(str) {
+        return str.normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    }
 
-    </script>
-    <style>
-        /* Profile Header */
-        .profile-header {
-            background: linear-gradient(135deg, rgb(6, 63, 41) 0%, rgb(74, 201, 105) 100%);
-            border: none;
-            border-radius: 15px;
-            color: white;
-        }
+    function searchBox() {
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const keyword = removeVietnameseTones(this.value.toLowerCase());
+            const filtered = window.allClasses.filter(classItem =>
+                removeVietnameseTones(classItem.course_name.toLowerCase()).includes(keyword)
+            );
+            renderClasses(filtered);
+        });
+    }
+</script>
+<style>
+    /* Profile Header */
+    .profile-header {
+        background: linear-gradient(135deg, rgb(6, 63, 41) 0%, rgb(74, 201, 105) 100%);
+        border: none;
+        border-radius: 15px;
+        color: white;
+    }
 
     .avatar-circle {
         width: 80px;

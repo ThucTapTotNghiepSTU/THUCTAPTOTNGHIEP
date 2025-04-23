@@ -199,7 +199,6 @@
                             const start = new Date(startTime);
                             const end = new Date(endTime);
                             if (now < start) return 'Pending';
-                            if (now >= start && now <= end) return 'Processing';
                             if (now > end) return 'Completed';
                             return 'Pending';
                         }
@@ -339,29 +338,30 @@
                                     }
                                     const showButton = isPending && now >= startTime && now <= endTimeBonus;
                                     examContainer.innerHTML += `
-                                    <div class="card shadow-sm border-0 mb-4">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <div>
-                                                    <h5 class="mb-1"><i class="bi bi-journal-check me-2 text-primary"></i>${exam.title}</h5>
-                                                    <p class="text-muted mb-2">${exam.content}</p>
-                                                </div>
-                                                <span class="badge rounded-pill bg-${badgeColor}">${exam.status}</span>
-                                            </div>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${exam.type}</li>
-                                                <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${exam.start_time}</li>
-                                                <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
-                                            </ul>
-                                            ${showButton ? `
-                                                <a href="/submissions/exam/${exam.exam_id}" class="btn btn-primary w-100 mt-2">
-                                                    <i class="bi bi-eye me-1"></i> Xem thêm
-                                                </a>` : ''}
-                                            ${hasScore ? `
-                                                <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
-                                        </div>
-                                    </div>
-                                `;
+                                                        <div class="card shadow-sm border-0 mb-4">
+                                                            <div class="card-body">
+                                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                    <div>
+                                                                        <h5 class="mb-1"><i class="bi bi-journal-check me-2 text-primary"></i>${exam.title}</h5>
+                                                                        <p class="text-muted mb-2">${exam.content}</p>
+                                                                    </div>
+                                                                    <span class="badge rounded-pill bg-${badgeColor}">${exam.status}</span>
+                                                                </div>
+                                                                <ul class="list-unstyled mb-3">
+                                                                    <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${exam.type}</li>
+                                                                    <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${exam.start_time}</li>
+                                                                    <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
+                                                                </ul>
+                                                                ${showButton ? `
+                                                                    <a href="/exam/detail?exam_id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
+                                                                        <i class="bi bi-eye me-1"></i> Xem thêm
+                                                                    </a>
+                    ` : ''}
+                                                                ${hasScore ? `
+                                                                    <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
+                                                            </div>
+                                                        </div>
+                                                    `;
                                 });
                                 data.assignments.forEach(assign => {
                                     const isPending = assign.status === 'Pending';
@@ -370,39 +370,37 @@
                                     const isSimultaneous = assign.isSimultaneous === true || assign.isSimultaneous === 1;
                                     const now = new Date();
 
-                                    const startTime = new Date(assign.start_time);
-                                    const endTime = new Date(assign.end_time);
+                                    /*        const startTime = new Date(assign.start_time);
+                                           const endTime = new Date(assign.end_time); */
 
-                                    let endTimeBonus = endTime;
+                                    /* let endTimeBonus = endTime;
                                     if (!isSimultaneous) {
                                         endTimeBonus = new Date(endTime);
                                         endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000);
                                     }
-                                    const showButton = isPending && now >= startTime && now <= endTimeBonus;
+                                    const showButton = isPending && now >= startTime && now <= endTimeBonus; */
                                     assignmentContainer.innerHTML += `
-                                    <div class="card shadow-sm border-0 mb-4">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <div>
-                                                    <h5 class="mb-1"><i class="bi bi-clipboard-data me-2 text-info"></i>${assign.title}</h5>
-                                                    <p class="text-muted mb-2">${assign.content}</p>
-                                                </div>
-                                                <span class="badge rounded-pill bg-${badgeColor}">${assign.status}</span>
-                                            </div>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${assign.type}</li>
-                                                <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${assign.start_time}</li>
-                                                <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
-                                            </ul>
-                                            ${showButton ? `
-                                                <a href="/submissions/assignment/${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
-                                                    <i class="bi bi-eye me-1"></i> Xem thêm
-                                                </a>` : ''}
-                                            ${hasScore ? `
-                                                <div class="mt-3"><strong>Điểm:</strong> ${assign.temporary_score}</div>` : ''}
-                                        </div>
-                                    </div>
-                                `;
+                                                        <div class="card shadow-sm border-0 mb-4">
+                                                            <div class="card-body">
+                                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                    <div>
+                                                                        <h5 class="mb-1"><i class="bi bi-clipboard-data me-2 text-info"></i>${assign.title}</h5>
+                                                                        <p class="text-muted mb-2">${assign.content}</p>
+                                                                    </div>
+                                                                    <span class="badge rounded-pill bg-${badgeColor}">${assign.status}</span>
+                                                                </div>
+                                                                <ul class="list-unstyled mb-3">
+                                                                    <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${assign.type}</li>
+                                                                    <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${assign.start_time}</li>
+                                                                    <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
+                                                                </ul>
+                                                                <a href="/assignment/detail?assignment_id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
+                                                                        <i class="bi bi-eye me-1"></i> Xem thêm
+                                                                    </a>
+                                                               
+                                                            </div>
+                                                        </div>
+                                                    `;
                                 });
                             } catch (err) {
                                 console.error("Lỗi khi tải bài kiểm tra và bài tập:", err);
@@ -428,16 +426,16 @@
                                     getClassroomInfo(classId)
                                 ]);
                                 courseInfoDiv.innerHTML = `
-                                        <h5>
-                                            Lớp của tôi /
-                                            <a href="/myclass" class="text-dark text-decoration-none"><strong>${courseRes.course_name || 'Không có dữ liệu'}</strong></a>
-                                        </h5>
-                                        <div class="position-relative rounded overflow-hidden text-white" style="min-height: 250px; background-image: url('images/header_image/default-class.jpg'); background-size: cover; background-position: center;">
-                                            <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-50 p-4 rounded">
-                                                <p class="mb-0"><strong>${classroom?.class_description || 'Không có dữ liệu'}</strong></p>
-                                            </div>
-                                        </div>
-                                    `;
+                                                            <h5>
+                                                                Lớp của tôi /
+                                                                <a href="/myclass" class="text-dark text-decoration-none"><strong>${courseRes.course_name || 'Không có dữ liệu'}</strong></a>
+                                                            </h5>
+                                                            <div class="position-relative rounded overflow-hidden text-white" style="min-height: 250px; background-image: url('images/header_image/default-class.jpg'); background-size: cover; background-position: center;">
+                                                                <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-50 p-4 rounded">
+                                                                    <p class="mb-0"><strong>${classroom?.class_description || 'Không có dữ liệu'}</strong></p>
+                                                                </div>
+                                                            </div>
+                                                        `;
                             } catch (err) {
                                 console.error("Lỗi khi tải thông tin môn học:", err);
                                 courseInfoDiv.innerHTML = '<p class="text-danger">Không thể tải thông tin môn học.</p>';
@@ -468,273 +466,273 @@
                     })
                 </script>
         @endauth
-        @auth('students')
-            <!-- Script dành cho sinh viên -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const studentId = '{{ Auth::user()->student_id }}';
-                    let courseId = null;
-                    let lecturerId = null;
-                    let classId = null;
+            @auth('students')
+                <!-- Script dành cho sinh viên -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const studentId = '{{ Auth::user()->student_id }}';
+                        let courseId = null;
+                        let lecturerId = null;
+                        let classId = null;
 
-                    // Lấy dữ liệu từ localStorage
-                    const storedData = localStorage.getItem("list_id_course_lecturer");
-                    if (storedData) {
-                        try {
-                            const listId = JSON.parse(storedData);
-                            courseId = listId.course_id;
-                            lecturerId = listId.lecturer_id;
-                            classId = listId.class_id;
-                            console.log('localStorage data (student):', listId);
-                        } catch (e) {
-                            console.error("Lỗi khi parse dữ liệu từ localStorage:", e);
-                        }
-                    }
-
-                    // Nếu courseId không có, thử lấy từ API
-                    if (!courseId && classId) {
-                        fetch(`/api/classrooms/getById/${classId}`, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        // Lấy dữ liệu từ localStorage
+                        const storedData = localStorage.getItem("list_id_course_lecturer");
+                        if (storedData) {
+                            try {
+                                const listId = JSON.parse(storedData);
+                                courseId = listId.course_id;
+                                lecturerId = listId.lecturer_id;
+                                classId = listId.class_id;
+                                console.log('localStorage data (student):', listId);
+                            } catch (e) {
+                                console.error("Lỗi khi parse dữ liệu từ localStorage:", e);
                             }
-                        })
-                            .then(res => {
-                                if (!res.ok) {
-                                    throw new Error(`HTTP error! status: ${res.status}`);
-                                }
-                                return res.json();
-                            })
-                            .then(classroom => {
-                                if (classroom && classroom.course_id) {
-                                    courseId = classroom.course_id;
-                                    lecturerId = classroom.lecturer_id;
-                                    console.log('courseId from API (student):', courseId);
-                                } else {
-                                    console.warn('Không thể lấy course_id từ API');
-                                }
-                            })
-                            .catch(err => {
-                                console.error('Lỗi khi lấy thông tin lớp học:', err);
-                            })
-                            .finally(() => {
-                                initializePage();
-                            });
-                    } else {
-                        // Fallback: Lấy từ URL
-                        const urlParams = new URLSearchParams(window.location.search);
-                        courseId = courseId || urlParams.get('course_id');
-                        lecturerId = lecturerId || urlParams.get('lecturer_id');
-                        classId = classId || urlParams.get('class_id');
-                        initializePage();
-                    }
-
-                    // Hàm khởi tạo trang
-                    function initializePage() {
-                        if (!courseId || !lecturerId || !classId) {
-                            document.getElementById("course-info").innerHTML = '<p class="text-danger">Không thể tải thông tin môn học do thiếu dữ liệu lớp học.</p>';
-                            document.getElementById("lecturer-info").innerHTML = '<p class="text-danger">Không thể tải thông tin giảng viên.</p>';
-                            document.getElementById("exam-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài kiểm tra.</p>';
-                            document.getElementById("assignment-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài tập.</p>';
-                            return;
                         }
 
-                        getCourseInfo(courseId, classId);
-                        getLecturerInfo(lecturerId);
-                        getAllStudentTasksOfCourse(studentId, courseId);
-                    }
-
-                    async function getCourseInfo(courseId, classId) {
-                        const courseInfoDiv = document.getElementById("course-info");
-
-                        try {
-                            const [courseRes, classroom] = await Promise.all([
-                                fetch(`/api/courses/getById/${courseId}`, {
-                                    headers: {
-                                        'Accept': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    }
-                                }).then(res => {
-                                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                                    return res.json();
-                                }),
-                                getClassroomInfo(classId)
-                            ]);
-
-                            courseInfoDiv.innerHTML = `
-                                                                                <h5>
-                                                                                    Lớp của tôi /
-                                                                                    <a href="/myclass" class="text-dark text-decoration-none"><strong>${courseRes.course_name || 'Không có dữ liệu'}</strong></a>
-                                                                                </h5>
-                                                                                <div class="position-relative rounded overflow-hidden text-white" style="min-height: 250px; background-image: url('images/header_image/default-class.jpg'); background-size: cover; background-position: center;">
-                                                                                    <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-50 p-4 rounded">
-                                                                                        <p class="mb-0"><strong>${classroom?.class_description || 'Không có dữ liệu'}</strong></p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            `;
-                        } catch (err) {
-                            console.error("Lỗi khi tải thông tin môn học:", err);
-                            courseInfoDiv.innerHTML = '<p class="text-danger">Không thể tải thông tin môn học.</p>';
-                        }
-                    }
-
-                    function getLecturerInfo(lecturerId) {
-                        const lecturerInfoDiv = document.getElementById("lecturer-info");
-
-                        fetch(`/api/lecturers/getById/${lecturerId}`, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        })
-                            .then(res => {
-                                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                                return res.json();
-                            })
-                            .then(lecturer => {
-                                lecturerInfoDiv.innerHTML = `
-                                                                                    <p><strong>Tên giáo viên:</strong> ${lecturer.fullname || 'Không có dữ liệu'}</p>
-                                                                                    <p><strong>Email:</strong> ${lecturer.school_email || 'Không có dữ liệu'}</p>
-                                                                                    <p><strong>Email cá nhân:</strong> ${lecturer.personal_email || 'Không có dữ liệu'}</p>
-                                                                                    <p><strong>Số điện thoại:</strong> ${lecturer.phone || 'Không có dữ liệu'}</p>
-                                                                                `;
-                            })
-                            .catch(err => {
-                                console.error("Lỗi khi tải thông tin giảng viên:", err);
-                                lecturerInfoDiv.innerHTML = '<p class="text-danger">Không thể tải thông tin giảng viên.</p>';
-                            });
-                    }
-
-                    function getClassroomInfo(classId) {
-                        return fetch(`/api/classrooms/getById/${classId}`, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        })
-                            .then(res => {
-                                if (!res.ok) {
-                                    throw new Error(`HTTP error! status: ${res.status}`);
-                                }
-                                return res.json();
-                            })
-                            .then(classroom => {
-                                return classroom;
-                            })
-                            .catch(err => {
-                                console.error("Lỗi khi tải thông tin lớp học:", err);
-                                return null;
-                            });
-                    }
-
-                    async function getAllStudentTasksOfCourse(studentId, courseId) {
-                        try {
-                            const res = await fetch(`/api/getAllStudentTasksOfCourse/${studentId}/${courseId}`, {
+                        // Nếu courseId không có, thử lấy từ API
+                        if (!courseId && classId) {
+                            fetch(`/api/classrooms/getById/${classId}`, {
                                 headers: {
                                     'Accept': 'application/json',
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                                 }
-                            });
-                            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                            const data = await res.json();
-                            const examContainer = document.getElementById('exam-container');
-                            const assignmentContainer = document.getElementById('assignment-container');
-
-                            examContainer.innerHTML = '';
-                            assignmentContainer.innerHTML = '';
-
-                            data.exams.forEach(exam => {
-                                const isPending = exam.status === 'Pending';
-                                const badgeColor = isPending ? 'warning text-dark' : 'success';
-                                const hasScore = exam.temporary_score != null;
-                                const isSimultaneous = exam.isSimultaneous === true || exam.isSimultaneous === 1;
-
-                                const now = new Date();
-                                const startTime = new Date(exam.start_time);
-                                const endTime = new Date(exam.end_time);
-
-                                let endTimeBonus = endTime;
-                                if (!isSimultaneous) {
-                                    endTimeBonus = new Date(endTime);
-                                    endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000);
-                                }
-                                const showButton = isPending && !isNaN(startTime) && !isNaN(endTimeBonus) && now >= startTime && now <= endTimeBonus;
-
-                                examContainer.innerHTML += `
-                                                                                    <div class="card shadow-sm border-0 mb-4">
-                                                                                        <div class="card-body">
-                                                                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                                                <div>
-                                                                                                    <h5 class="mb-1"><i class="bi bi-journal-check me-2 text-primary"></i>${exam.title}</h5>
-                                                                                                    <p class="text-muted mb-2">${exam.content}</p>
-                                                                                                </div>
-                                                                                                <span class="badge rounded-pill bg-${badgeColor}">${exam.status}</span>
-                                                                                            </div>
-                                                                                            <ul class="list-unstyled mb-3">
-                                                                                                <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${exam.type}</li>
-                                                                                                <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${exam.start_time}</li>
-                                                                                                <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
-                                                                                            </ul>
-                                                                                            ${showButton ? `
-                                                                                                <a href="/task/start?id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
-                                                                                                    <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
-                                                                                                </a>` : ''}
-                                                                                            ${hasScore ? `
-                                                                                                <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                `;
-                            });
-
-                            data.assignments.forEach(assign => {
-                                const isPending = assign.status === 'Pending';
-                                const badgeColor = isPending ? 'warning text-dark' : 'success';
-                                const hasScore = assign.temporary_score != null;
-                                const isSimultaneous = assign.isSimultaneous === true || assign.isSimultaneous === 1;
-
-                                const now = new Date();
-                                const startTime = new Date(assign.start_time);
-                                const endTime = new Date(assign.end_time);
-
-                                let endTimeBonus = endTime;
-                                if (!isSimultaneous) {
-                                    endTimeBonus = new Date(endTime);
-                                    endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000);
-                                }
-                                const showButton = isPending && !isNaN(startTime) && !isNaN(endTimeBonus) && now >= startTime && now <= endTimeBonus;
-
-                                assignmentContainer.innerHTML += `
-                                                                                    <div class="card shadow-sm border-0 mb-4">
-                                                                                        <div class="card-body">
-                                                                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                                                <div>
-                                                                                                    <h5 class="mb-1"><i class="bi bi-clipboard-data me-2 text-info"></i>${assign.title}</h5>
-                                                                                                    <p class="text-muted mb-2">${assign.content}</p>
-                                                                                                </div>
-                                                                                                <span class="badge rounded-pill bg-${badgeColor}">${assign.status}</span>
-                                                                                            </div>
-                                                                                            <ul class="list-unstyled mb-3">
-                                                                                                <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${assign.type}</li>
-                                                                                                <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${assign.start_time}</li>
-                                                                                                <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
-                                                                                            </ul>
-                                                                                            ${showButton ? `
-                                                                                                <a href="/task/start?id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
-                                                                                                    <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
-                                                                                                </a>` : ''}
-                                                                                            ${hasScore ? `
-                                                                                                <div class="mt-3"><strong>Điểm:</strong> ${assign.temporary_score}</div>` : ''}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                `;
-                            });
-                        } catch (err) {
-                            console.error("Lỗi khi tải bài kiểm tra và bài tập:", err);
-                            document.getElementById("exam-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài kiểm tra.</p>';
-                            document.getElementById("assignment-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài tập.</p>';
+                            })
+                                .then(res => {
+                                    if (!res.ok) {
+                                        throw new Error(`HTTP error! status: ${res.status}`);
+                                    }
+                                    return res.json();
+                                })
+                                .then(classroom => {
+                                    if (classroom && classroom.course_id) {
+                                        courseId = classroom.course_id;
+                                        lecturerId = classroom.lecturer_id;
+                                        console.log('courseId from API (student):', courseId);
+                                    } else {
+                                        console.warn('Không thể lấy course_id từ API');
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('Lỗi khi lấy thông tin lớp học:', err);
+                                })
+                                .finally(() => {
+                                    initializePage();
+                                });
+                        } else {
+                            // Fallback: Lấy từ URL
+                            const urlParams = new URLSearchParams(window.location.search);
+                            courseId = courseId || urlParams.get('course_id');
+                            lecturerId = lecturerId || urlParams.get('lecturer_id');
+                            classId = classId || urlParams.get('class_id');
+                            initializePage();
                         }
-                    }
-                });
-            </script>
-        @endauth
+
+                        // Hàm khởi tạo trang
+                        function initializePage() {
+                            if (!courseId || !lecturerId || !classId) {
+                                document.getElementById("course-info").innerHTML = '<p class="text-danger">Không thể tải thông tin môn học do thiếu dữ liệu lớp học.</p>';
+                                document.getElementById("lecturer-info").innerHTML = '<p class="text-danger">Không thể tải thông tin giảng viên.</p>';
+                                document.getElementById("exam-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài kiểm tra.</p>';
+                                document.getElementById("assignment-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài tập.</p>';
+                                return;
+                            }
+
+                            getCourseInfo(courseId, classId);
+                            getLecturerInfo(lecturerId);
+                            getAllStudentTasksOfCourse(studentId, courseId);
+                        }
+
+                        async function getCourseInfo(courseId, classId) {
+                            const courseInfoDiv = document.getElementById("course-info");
+
+                            try {
+                                const [courseRes, classroom] = await Promise.all([
+                                    fetch(`/api/courses/getById/${courseId}`, {
+                                        headers: {
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                        }
+                                    }).then(res => {
+                                        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                                        return res.json();
+                                    }),
+                                    getClassroomInfo(classId)
+                                ]);
+
+                                courseInfoDiv.innerHTML = `
+                                                                                                <h5>
+                                                                                                    Lớp của tôi /
+                                                                                                    <a href="/myclass" class="text-dark text-decoration-none"><strong>${courseRes.course_name || 'Không có dữ liệu'}</strong></a>
+                                                                                                </h5>
+                                                                                                <div class="position-relative rounded overflow-hidden text-white" style="min-height: 250px; background-image: url('images/header_image/default-class.jpg'); background-size: cover; background-position: center;">
+                                                                                                    <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-50 p-4 rounded">
+                                                                                                        <p class="mb-0"><strong>${classroom?.class_description || 'Không có dữ liệu'}</strong></p>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            `;
+                            } catch (err) {
+                                console.error("Lỗi khi tải thông tin môn học:", err);
+                                courseInfoDiv.innerHTML = '<p class="text-danger">Không thể tải thông tin môn học.</p>';
+                            }
+                        }
+
+                        function getLecturerInfo(lecturerId) {
+                            const lecturerInfoDiv = document.getElementById("lecturer-info");
+
+                            fetch(`/api/lecturers/getById/${lecturerId}`, {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            })
+                                .then(res => {
+                                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                                    return res.json();
+                                })
+                                .then(lecturer => {
+                                    lecturerInfoDiv.innerHTML = `
+                                                                                                    <p><strong>Tên giáo viên:</strong> ${lecturer.fullname || 'Không có dữ liệu'}</p>
+                                                                                                    <p><strong>Email:</strong> ${lecturer.school_email || 'Không có dữ liệu'}</p>
+                                                                                                    <p><strong>Email cá nhân:</strong> ${lecturer.personal_email || 'Không có dữ liệu'}</p>
+                                                                                                    <p><strong>Số điện thoại:</strong> ${lecturer.phone || 'Không có dữ liệu'}</p>
+                                                                                                `;
+                                })
+                                .catch(err => {
+                                    console.error("Lỗi khi tải thông tin giảng viên:", err);
+                                    lecturerInfoDiv.innerHTML = '<p class="text-danger">Không thể tải thông tin giảng viên.</p>';
+                                });
+                        }
+
+                        function getClassroomInfo(classId) {
+                            return fetch(`/api/classrooms/getById/${classId}`, {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            })
+                                .then(res => {
+                                    if (!res.ok) {
+                                        throw new Error(`HTTP error! status: ${res.status}`);
+                                    }
+                                    return res.json();
+                                })
+                                .then(classroom => {
+                                    return classroom;
+                                })
+                                .catch(err => {
+                                    console.error("Lỗi khi tải thông tin lớp học:", err);
+                                    return null;
+                                });
+                        }
+
+                        async function getAllStudentTasksOfCourse(studentId, courseId) {
+                            try {
+                                const res = await fetch(`/api/getAllStudentTasksOfCourse/${studentId}/${courseId}`, {
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                });
+                                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                                const data = await res.json();
+                                const examContainer = document.getElementById('exam-container');
+                                const assignmentContainer = document.getElementById('assignment-container');
+
+                                examContainer.innerHTML = '';
+                                assignmentContainer.innerHTML = '';
+
+                                data.exams.forEach(exam => {
+                                    const isPending = exam.status === 'Pending';
+                                    const badgeColor = isPending ? 'warning text-dark' : 'success';
+                                    const hasScore = exam.temporary_score != null;
+                                    const isSimultaneous = exam.isSimultaneous === true || exam.isSimultaneous === 1;
+
+                                    const now = new Date();
+                                    const startTime = new Date(exam.start_time);
+                                    const endTime = new Date(exam.end_time);
+
+                                    let endTimeBonus = endTime;
+                                    if (!isSimultaneous) {
+                                        endTimeBonus = new Date(endTime);
+                                        endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                    }
+                                    const showButton = isPending && !isNaN(startTime) && !isNaN(endTimeBonus) && now >= startTime && now <= endTimeBonus;
+
+                                    examContainer.innerHTML += `
+                                                                                                    <div class="card shadow-sm border-0 mb-4">
+                                                                                                        <div class="card-body">
+                                                                                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                                                                <div>
+                                                                                                                    <h5 class="mb-1"><i class="bi bi-journal-check me-2 text-primary"></i>${exam.title}</h5>
+                                                                                                                    <p class="text-muted mb-2">${exam.content}</p>
+                                                                                                                </div>
+                                                                                                                <span class="badge rounded-pill bg-${badgeColor}">${exam.status}</span>
+                                                                                                            </div>
+                                                                                                            <ul class="list-unstyled mb-3">
+                                                                                                                <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${exam.type}</li>
+                                                                                                                <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${exam.start_time}</li>
+                                                                                                                <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${exam.end_time}</li>
+                                                                                                            </ul>
+                                                                                                            ${showButton ? `
+                                                                                                                <a href="/task/start?id=${exam.exam_id}" class="btn btn-primary w-100 mt-2">
+                                                                                                                    <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
+                                                                                                                </a>` : ''}
+                                                                                                            ${hasScore ? `
+                                                                                                                <div class="mt-3"><strong>Điểm:</strong> ${exam.temporary_score}</div>` : ''}
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                `;
+                                });
+
+                                data.assignments.forEach(assign => {
+                                    const isPending = assign.status === 'Pending';
+                                    const badgeColor = isPending ? 'warning text-dark' : 'success';
+                                    const hasScore = assign.temporary_score != null;
+                                    const isSimultaneous = assign.isSimultaneous === true || assign.isSimultaneous === 1;
+
+                                    const now = new Date();
+                                    const startTime = new Date(assign.start_time);
+                                    const endTime = new Date(assign.end_time);
+
+                                    let endTimeBonus = endTime;
+                                    if (!isSimultaneous) {
+                                        endTimeBonus = new Date(endTime);
+                                        endTimeBonus.setTime(endTimeBonus.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                    }
+                                    const showButton = isPending && !isNaN(startTime) && !isNaN(endTimeBonus) && now >= startTime && now <= endTimeBonus;
+
+                                    assignmentContainer.innerHTML += `
+                                                                                                    <div class="card shadow-sm border-0 mb-4">
+                                                                                                        <div class="card-body">
+                                                                                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                                                                <div>
+                                                                                                                    <h5 class="mb-1"><i class="bi bi-clipboard-data me-2 text-info"></i>${assign.title}</h5>
+                                                                                                                    <p class="text-muted mb-2">${assign.content}</p>
+                                                                                                                </div>
+                                                                                                                <span class="badge rounded-pill bg-${badgeColor}">${assign.status}</span>
+                                                                                                            </div>
+                                                                                                            <ul class="list-unstyled mb-3">
+                                                                                                                <li><i class="bi bi-bookmark me-2"></i><strong>Loại:</strong> ${assign.type}</li>
+                                                                                                                <li><i class="bi bi-clock me-2"></i><strong>Bắt đầu:</strong> ${assign.start_time}</li>
+                                                                                                                <li><i class="bi bi-clock-history me-2"></i><strong>Kết thúc:</strong> ${assign.end_time}</li>
+                                                                                                            </ul>
+                                                                                                            ${showButton ? `
+                                                                                                                <a href="/task/start?id=${assign.assignment_id}" class="btn btn-info text-white w-100 mt-2">
+                                                                                                                    <i class="bi bi-pencil-square me-1"></i> Làm bài ngay
+                                                                                                                </a>` : ''}
+                                                                                                            ${hasScore ? `
+                                                                                                                <div class="mt-3"><strong>Điểm:</strong> ${assign.temporary_score}</div>` : ''}
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                `;
+                                });
+                            } catch (err) {
+                                console.error("Lỗi khi tải bài kiểm tra và bài tập:", err);
+                                document.getElementById("exam-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài kiểm tra.</p>';
+                                document.getElementById("assignment-container").innerHTML = '<p class="text-danger">Không thể tải danh sách bài tập.</p>';
+                            }
+                        }
+                    });
+                </script>
+            @endauth
 @endsection

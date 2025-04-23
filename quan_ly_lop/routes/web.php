@@ -22,7 +22,7 @@ use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\StudentAssignmentController;
 use App\Http\Controllers\GradingController;
 use App\Http\Controllers\ClassroomViewController;
-
+ use App\Http\Controllers\StudentTaskController;
 
 // ========== ROUTE CÔNG KHAI ==========
 Route::get('/', function () {
@@ -119,6 +119,21 @@ Route::middleware('auth')->group(function () {
     // Grading routes
     Route::post('/submissions/{submission_id}/grade', [GradingController::class, 'gradeSubmission'])->name('submissions.grade');
     Route::post('/submissions/{submission_id}/manual-grade', [GradingController::class, 'updateManualGrades'])->name('submissions.manual-grade');
+    // làm bài
+
+    Route::get('/task/start', [StudentTaskController::class, 'redirectToProperPage']);
+    Route::get('/essay', function () {
+        return view('essay'); // hoặc gọi controller nếu bạn muốn render từ backend
+    })->name('essay.page');
+
+    Route::get('/quiz', function () {
+        return view('quiz');
+    })->name('quiz.page');
+
+    Route::get('/classDetail', function () {
+        return view('show_class');
+    });
+    Route::get('/getCourseOfStudent/{student_id}', [CourseController::class, 'showCourseOfStudent'])->name('showCourseOfStudent');
 });
 
 // ========== ROUTE DÀNH RIÊNG CHO GIẢNG VIÊN ==========
@@ -137,6 +152,14 @@ Route::middleware('auth:lecturer')->group(function () {
     Route::get('/lecturer/chi_tiet_ma_de/{sub_list_id}', [SubListController::class, 'show'])->middleware('auth');
     //Route liên quan đến câu hỏi
     Route::get('/createQuestion', [ListQuestionController::class, 'index'])->name('createQuestion');
+    Route::get('/exam/detail', function (Illuminate\Http\Request $request) {
+        $examId = $request->query('exam_id');
+        return view('lecturer.exam_detail', ['examId' => $examId]);
+    });
+    Route::get('/assignment/detail', function (Illuminate\Http\Request $request) {
+        $assignmentId = $request->query('assignment_id');
+        return view('lecturer.assignment_detail', ['assignmentId' => $assignmentId]);
+    });
 });
 
 // ========== ROUTE PHỤ: DÙNG NỘI BỘ ==========
