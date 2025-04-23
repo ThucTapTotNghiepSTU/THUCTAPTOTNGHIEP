@@ -13,8 +13,8 @@ class ITCourseController extends Controller
         // Cache kết quả trong 1 giờ
         $courses = Cache::remember('it_courses', 3600, function () {
             return ITCourse::where('status', 'active')
-                          ->orderBy('created_at', 'desc')
-                          ->get();
+                ->orderBy('created_at', 'desc')
+                ->get();
         });
 
         $categories = ITCourse::getCategories();
@@ -35,10 +35,10 @@ class ITCourseController extends Controller
         // Tìm kiếm theo từ khóa
         if ($request->has('keyword')) {
             $keyword = $request->keyword;
-            $query->where(function($q) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
                 $q->where('name', 'LIKE', "%{$keyword}%")
-                  ->orWhere('description', 'LIKE', "%{$keyword}%")
-                  ->orWhere('code', 'LIKE', "%{$keyword}%");
+                    ->orWhere('description', 'LIKE', "%{$keyword}%")
+                    ->orWhere('code', 'LIKE', "%{$keyword}%");
             });
         }
 
@@ -58,7 +58,7 @@ class ITCourseController extends Controller
     public function getRecommendedBooks($courseId)
     {
         $course = ITCourse::findOrFail($courseId);
-        
+
         // Cache sách được đề xuất trong 1 ngày
         $books = Cache::remember("course_{$courseId}_books", 86400, function () use ($course) {
             return [
@@ -77,4 +77,4 @@ class ITCourseController extends Controller
             'data' => $books
         ]);
     }
-} 
+}

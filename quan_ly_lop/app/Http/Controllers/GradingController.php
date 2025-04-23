@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class GradingController extends Controller
 {
-    
+
     public function gradeSubmission(Request $request, $submission_id)
     {
         $submission = Submission::findOrFail($submission_id);
         $answers = Answer::where('submission_id', $submission_id)->get();
 
         $totalScore = 0;
-        $maxScore = 10; 
+        $maxScore = 10;
         $gradedAnswers = [];
 
         foreach ($answers as $answer) {
@@ -51,16 +51,16 @@ class GradingController extends Controller
                     'is_correct' => $isCorrect
                 ];
             } else {
-                
+
                 $gradedAnswers[] = [
                     'question' => $answer->question_title,
                     'student_answer' => $answer->question_answer,
-                    'score' => null 
+                    'score' => null
                 ];
             }
         }
 
-        
+
         $submission->temporary_score = $totalScore;
         $submission->save();
 
@@ -72,7 +72,7 @@ class GradingController extends Controller
         ]);
     }
 
-    
+
     public function updateManualGrades(Request $request, $submission_id)
     {
         $request->validate([
@@ -102,7 +102,7 @@ class GradingController extends Controller
             }
         }
 
-      
+
         if ($essayCount > 0) {
             $totalScore = $totalScore / ($essayCount + 1); // Average of multiple choice and essay scores
         }
