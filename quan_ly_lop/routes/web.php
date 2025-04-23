@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClassroomViewController;
 use App\Http\Controllers\LecturerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LecturerDashboardController;
@@ -144,3 +145,4 @@ Route::prefix('lecturer')->group(function () {
     Route::get('/exams/{examId}', [LecturerDashboardController::class, 'examDetail'])->name('lecturer.exam.detail');
     Route::get('/assignments/{assignmentId}', [LecturerDashboardController::class, 'assignmentDetail'])->name('lecturer.assignment.detail');
 });
+Route::get('/view/classroom', [ClassroomViewController::class, 'show'])->name('lecturer.classroom.show');

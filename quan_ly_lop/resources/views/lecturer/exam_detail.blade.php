@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fetchExamDetail(examId) {
-    fetch(`http://127.0.0.1:8001/api/lecturer-student/exams/${examId}`)
+    fetch(`/api/lecturer-student/exams/${examId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
