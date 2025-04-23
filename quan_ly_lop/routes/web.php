@@ -23,7 +23,16 @@ use App\Http\Controllers\StudentAssignmentController;
 use App\Http\Controllers\StudentTaskController;
 
 // ========== ROUTE CÔNG KHAI ==========
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', function () {
+    if (Auth::check()) {
+        if (Auth::user()->lecturer_id) {
+            return redirect()->route('homeLecturer');
+        } elseif (Auth::user()->student_id) {
+            return redirect()->route('homeLoggedIn');
+        }
+    }
+    return view('welcome'); // hoặc trang landing page chung cho chưa đăng nhập
+})->name('home');
 Route::get('/submission/show', [SubmissionController::class, 'show'])->name('submissions.show');
 // ========== ROUTE CHO GUEST ==========
 Route::middleware('guest')->group(function () {

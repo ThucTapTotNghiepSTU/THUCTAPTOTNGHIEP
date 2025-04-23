@@ -20,8 +20,8 @@
                         <div class="col">
                             <p class="text-light mb-0">
                                 <i class="fas fa-id-card me-2"></i>@if(Auth::guard('lecturer')->check())
-                                Xin chào giảng viên {{ Auth::guard('lecturer')->user()->fullname }}
-                            @endif
+                                    Xin chào giảng viên {{ Auth::guard('lecturer')->user()->fullname }}
+                                @endif
                             </p>
                         </div>
                     </div>
@@ -70,8 +70,8 @@
                         <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
                     </a>
                     <!--                     <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg">
-                                                        <i class="fas fa-user-plus me-2"></i>Đăng ký
-                                                    </a> -->
+                                                                <i class="fas fa-user-plus me-2"></i>Đăng ký
+                                                            </a> -->
                 </div>
             </div>
         @endauth
@@ -88,23 +88,23 @@
             fetch(`/api/lecturers/${lecturerId}/classrooms`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
                 }
             })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Lỗi khi gọi API');
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    // Nếu bạn trả về object {lecturer_id, fullname, classrooms: [...]}
                     renderClasses(data.classrooms || []);
                     window.allClasses = data.classrooms || [];
                     searchBox();
                 })
                 .catch(error => {
-                    console.error(error);
+                    console.error('Lỗi khi tải lớp học:', error);
                     document.getElementById('dynamic-classes').innerHTML =
                         '<p class="text-danger">Lỗi khi tải lớp học.</p>';
                 });
@@ -112,6 +112,8 @@
 
         function renderClasses(data) {
             const container = document.getElementById('dynamic-classes');
+            const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
+
             if (data.length === 0) {
                 container.innerHTML = '<p class="text-muted">Không có lớp học nào.</p>';
                 return;
@@ -120,42 +122,41 @@
             let html = '';
             data.forEach(classItem => {
                 html += `
-                        <div class="col-12 col-md-6 col-lg-4">
-                            <div class="class-card card h-100">
-                                <div class="class-card-header">
-                                    <img src="${classItem.image || 'images/header_image/default-class.jpg'}" class="class-image" alt="${classItem.course?.course_name || 'Lớp học'}">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="class-card card h-100">
+                            <div class="class-card-header">
+                                <img src="${classItem.image || 'images/header_image/default-class.jpg'}" class="class-image" alt="${classItem.course?.course_name || 'Lớp học'}">
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <p class="card-author mb-0">
+                                        <i class="fas fa-chalkboard-teacher me-2"></i>Bạn
+                                    </p>
                                 </div>
-
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <p class="card-author mb-0">
-                                            <i class="fas fa-chalkboard-teacher me-2"></i>Bạn
-                                        </p>
+                                <h5 class="card-title">${classItem.course?.course_name || 'Tên lớp'}</h5>
+                                <p class="card-text text-muted">${classItem.class_description || 'Không có mô tả'}</p>
+                                <div class="class-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-users me-2"></i>
+                                        <span>${classItem.studentClasses?.length || 0}</span>
                                     </div>
-                                    <h5 class="card-title">${classItem.course?.course_name || 'Tên lớp'}</h5>
-                                    <p class="card-text text-muted">${classItem.class_description || 'Không có mô tả'}</p>
-
-                                    <div class="class-info">
-                                        <div class="info-item">
-                                            <i class="fas fa-users me-2"></i>
-                                            <span>${classItem.studentClasses?.length || 0}</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <i class="fas fa-calendar-alt me-2"></i>
-                                            <span>${classItem.class_duration || 'N/A'}</span>
-                                        </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        <span>${classItem.class_duration || 'N/A'}</span>
                                     </div>
-
-                                    <div class="mt-3">
-                                        <button class="btn btn-outline-primary w-100 join-button"
-                                            data-class-id="${classItem.class_id}">
-                                            <i class="fas fa-eye me-2"></i>Xem chi tiết
-                                        </button>
-                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary w-100 join-button"
+                                        data-class-id="${classItem.class_id}"
+                                        data-course-id="${classItem.course?.course_id || ''}"
+                                        data-lecturer-id="${lecturerId}">
+                                        <i class="fas fa-eye me-2"></i>Xem chi tiết
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    `;
+                    </div>
+                `;
             });
 
             container.innerHTML = html;
@@ -163,26 +164,26 @@
         }
 
         function attachJoinHandlers() {
-            const joinButtons = document.querySelectorAll('.join-button'); // Tìm tất cả nút có class 'join-button'
-
+            const joinButtons = document.querySelectorAll('.join-button');
             joinButtons.forEach(button => {
                 button.addEventListener('click', function () {
-                    // Lấy thông tin từ thuộc tính data-* của nút
-                    const courseId = this.getAttribute('data-course-id');
-                    const lecturerId = this.getAttribute('data-lecturer-id');
-                    const classId = this.getAttribute('data-class-id');
+                    const courseId = this.getAttribute('data-course-id') || null;
+                    const lecturerId = this.getAttribute('data-lecturer-id') || null;
+                    const classId = this.getAttribute('data-class-id') || null;
 
-                    // Tạo một object chứa các ID này
+                    if (!classId) {
+                        console.error('Thiếu class_id');
+                        return;
+                    }
+
                     const listId = {
                         course_id: courseId,
                         lecturer_id: lecturerId,
                         class_id: classId
                     };
 
-                    // Lưu object đó vào localStorage dưới tên "list_id_course_lecturer"
+                    console.log('Lưu localStorage:', listId);
                     localStorage.setItem("list_id_course_lecturer", JSON.stringify(listId));
-
-                    // Chuyển hướng đến trang chi tiết lớp học
                     window.location.href = "/classDetail";
                 });
             });
@@ -207,7 +208,7 @@
     <style>
         /* Profile Header */
         .profile-header {
-            background: linear-gradient(135deg, rgb(6, 63, 41) 0%,rgb(74, 201, 105) 100%);
+            background: linear-gradient(135deg, rgb(6, 63, 41) 0%, rgb(74, 201, 105) 100%);
             border: none;
             border-radius: 15px;
             color: white;
