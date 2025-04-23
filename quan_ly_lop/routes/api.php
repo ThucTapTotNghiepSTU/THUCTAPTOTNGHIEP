@@ -182,6 +182,7 @@ Route::prefix('classrooms')->group(function () {
     Route::put('/update/{id}', [ClassroomController::class, 'update']);
     Route::delete('/delete/{id}', [ClassroomController::class, 'destroy']);
     Route::get('/student-classes/{student_code}', [ClassroomController::class, 'getStudentClasses']);
+    Route::get('/getAllLecturerTasksOfCourse/{lecturerId}/{courseId}', [ClassroomController::class, 'getAllLecturerTasksOfCourse']);
 });
 
 // Nhóm routes cho sinh viên
@@ -234,7 +235,7 @@ Route::prefix('lecturer-student')->group(function () {
 
         //  // Lấy bài kiểm tra theo giảng viên
         //  Route::get('/exam/{lecturer_id}', [LecturerAssignmentController::class, 'getExams']);
-    ;
+
     // Lấy danh sách bài tập theo giảng viên
     Route::get('/assignments', [LecturerAssignmentController::class, 'getAssignments']);
 

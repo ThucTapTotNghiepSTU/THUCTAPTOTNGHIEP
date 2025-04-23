@@ -19,6 +19,18 @@ class LoginController extends Controller
         }
         return view('auth.login');
     }
+    protected function redirectTo()
+    {
+        if (Auth::check()) {
+            if (Auth::user()->lecturer_id) {
+                return route('homeLecturer');
+            } elseif (Auth::user()->student_id) {
+                return route('homeLoggedIn');
+            }
+        }
+
+        return '/'; // fallback
+    }
     public function login(Request $request)
     {
         try {
