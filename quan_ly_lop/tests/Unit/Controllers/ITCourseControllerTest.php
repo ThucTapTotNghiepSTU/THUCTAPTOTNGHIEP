@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ITCourseControllerTest extends TestCase
 {
@@ -137,5 +138,20 @@ class ITCourseControllerTest extends TestCase
         $cachedBooks = Cache::get($cacheKey);
         $this->assertIsArray($cachedBooks);
         $this->assertNotEmpty($cachedBooks);
+    }
+
+    protected function tearDown(): void
+    {
+        // Clean up test data
+        DB::table('exam')->truncate();
+        DB::table('sub_list')->truncate();
+        DB::table('question')->truncate();
+        DB::table('option')->truncate();
+        DB::table('sub_list_question')->truncate();
+        DB::table('student')->truncate();
+        DB::table('submission')->truncate();
+        DB::table('answer')->truncate();
+
+        parent::tearDown();
     }
 }

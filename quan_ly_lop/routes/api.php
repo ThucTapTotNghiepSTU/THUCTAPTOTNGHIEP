@@ -260,3 +260,4 @@ Route::get('/exams-test', [AssignmentController::class, 'getAllExams']);
 
 Route::get('/getAllExamsAndAssignments/{studentId}', [StudentTaskController::class, 'getAllStudentTasks']);
 Route::get('/getAllStudentTasksOfCourse/{studentId}/{courseId}', [StudentTaskController::class, 'getAllStudentTasksOfCourse']);
+Route::post('/submissions/{id}/grade', [SubmissionController::class, 'gradeSubmission']);

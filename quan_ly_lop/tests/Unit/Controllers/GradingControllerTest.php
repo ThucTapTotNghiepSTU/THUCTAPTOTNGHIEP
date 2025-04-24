@@ -33,11 +33,12 @@ class GradingControllerTest extends TestCase
         $question = Question::factory()->create([
             'type' => 'Trắc nghiệm',
             'title' => 'Câu hỏi trắc nghiệm',
-            'content' => 'Nội dung câu hỏi'
+            'content' => 'Nội dung câu hỏi',
+            'max_score' => 10
         ]);
 
         // Tạo các lựa chọn
-        $correctOption = Options::factory()->create([
+        Options::factory()->create([
             'question_id' => $question->question_id,
             'option_text' => 'Đáp án đúng',
             'is_correct' => true
@@ -203,5 +204,27 @@ class GradingControllerTest extends TestCase
         $this->assertEquals(5, $responseData->total_score);
         $this->assertEquals(10, $responseData->max_score);
         $this->assertCount(2, $responseData->graded_answers);
+    }
+
+    /** @test */
+    public function it_returns_error_when_submission_not_found()
+    {
+        $response = $this->controller->gradeSubmission(new Request(), 999);
+
+        $this->assertEquals(404, $response->status());
+        $responseData = $response->getData();
+        $this->assertEquals('Submission not found', $responseData->message);
+    }
+
+    /** @test */
+    public function it_returns_error_when_no_answers_found()
+    {
+        $submission = Submission::factory()->create();
+
+        $response = $this->controller->gradeSubmission(new Request(), $submission->submission_id);
+
+        $this->assertEquals(400, $response->status());
+        $responseData = $response->getData();
+        $this->assertEquals('No answers found for this submission', $responseData->message);
     }
 }
