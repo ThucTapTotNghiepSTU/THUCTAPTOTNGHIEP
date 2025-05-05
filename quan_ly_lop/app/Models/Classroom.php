@@ -80,5 +80,9 @@ class Classroom extends Model
     public function lecturer()
     {
         return $this->belongsTo(Lecturer::class, 'lecturer_id');
+<<<<<<< HEAD
+    }}
+=======
     }
 }
+>>>>>>> c3625acc5bb1d7578809f4c590a444ebdd2e7af8

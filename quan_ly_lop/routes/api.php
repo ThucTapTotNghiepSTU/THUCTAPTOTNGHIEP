@@ -258,6 +258,11 @@ Route::prefix('lecturer-student')->group(function () {
 
 Route::get('/assignments-test', [AssignmentController::class, 'getAllAssignments']);
 Route::get('/exams-test', [AssignmentController::class, 'getAllExams']);
-
+// API cho IT Courses
+Route::prefix('it-courses')->group(function () {
+    Route::get('/', [ITCourseController::class, 'index']);
+    Route::get('/search', [ITCourseController::class, 'search']);
+    Route::get('/{id}/books', [ITCourseController::class, 'getRecommendedBooks']);
+});
 Route::get('/getAllExamsAndAssignments/{studentId}', [StudentTaskController::class, 'getAllStudentTasks']);
 Route::get('/getAllStudentTasksOfCourse/{studentId}/{courseId}', [StudentTaskController::class, 'getAllStudentTasksOfCourse']);
