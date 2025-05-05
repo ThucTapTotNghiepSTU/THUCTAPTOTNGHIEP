@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Log;
 class AssignmentController extends Controller
 {
     /**
@@ -28,40 +28,50 @@ class AssignmentController extends Controller
      */
     public function show($id)
     {
+        // Load assignment with nested relationships for questions and options
         $assignments = Assignment::with([
             'subList.subListQuestions.question.options'
         ])->find($id);
 
+        // Check if the assignment exists
         if (!$assignments) {
             return response()->json(['message' => 'Bài thi không tồn tại!'], Response::HTTP_NOT_FOUND);
         }
 
+        // Map questions based on the assignment type (Multiple choice or others)
         $questions = $assignments->subList->subListQuestions->map(function ($item) use ($assignments) {
             $question = $item->question;
 
+            // If it's a multiple-choice question
             if ($assignments->type === 'Trắc nghiệm') {
                 return [
                     'question_id' => $question->question_id,
-                    'content'     => $question->content,
-                    'choices'     => $question->options->map(function ($opt) {
+                    'content' => $question->content,
+                    'choices' => $question->options->map(function ($opt) {
                         return $opt->option_text;
                     }),
                 ];
             } else {
+                // If it's not a multiple-choice question (e.g., essay or short answer)
                 return [
                     'question_id' => $question->question_id,
-                    'content'     => $question->content,
+                    'content' => $question->content,
                 ];
             }
         });
 
+        // Return the assignment data with questions
         return response()->json([
-            'assignments_id'   => $assignments->assignments_id,
-            'title'     => $assignments->title,
-            'type'      => $assignments->type,
+            'assignment_id' => $assignments->assignment_id,
+            'title' => $assignments->title,
+            'type' => $assignments->type,
+            'start_time' => $assignments->start_time,
+            'end_time' => $assignments->end_time,
+            'isSimultaneous' => $assignments->isSimultaneous,
             'questions' => $questions,
         ]);
     }
+
 
     /**
      * Hiển thị form tạo mới bài tập
@@ -77,33 +87,53 @@ class AssignmentController extends Controller
      */
     public function store(Request $request)
     {
-        // Xác thực dữ liệu đầu vào từ request với các quy tắc sau:
-        $validated = $request->validate([
-            'title' => 'required|string|max:255', // Tiêu đề: bắt buộc, là chuỗi, tối đa 255 ký tự
-            'description' => 'required|string', // Mô tả: bắt buộc, là chuỗi
-            'type' => 'required|in:assignment,exam', // Loại: bắt buộc, chỉ được là 'assignment' hoặc 'exam'
-            'start_time' => 'nullable|date', // Thời gian bắt đầu: có thể null, phải là định dạng ngày
-            'end_time' => 'nullable|date|after:start_time', // Thời gian kết thúc: có thể null, phải là ngày và sau start_time
-            'is_simultaneous' => 'boolean', // Làm đồng thời: kiểu boolean
-            'class_ids' => 'required|array', // Danh sách lớp: bắt buộc, phải là mảng
-            'class_ids.*' => 'exists:classes,id' // Mỗi ID lớp trong mảng phải tồn tại trong bảng classes
-        ]);
+        try {
+            // Xác thực dữ liệu
+            $validated = $request->validate([
+                'sub_list_id' => 'required|exists:sub_list,sub_list_id',
+                'title' => 'required|string|max:255',
+                'content' => 'nullable|string',
+                'type' => 'required|string|in:' . implode(',', Assignment::getAllowedTypes()),
+                'isSimultaneous' => 'boolean',
+                'show_result' => 'boolean',
+                'start_time' => 'nullable|date',
+                'end_time' => 'nullable|date|after_or_equal:start_time',
+                'status' => 'required|string|in:' . implode(',', Assignment::getAllowedStatuses()),
+            ]);
+            // Tạo bài tập
+            $assignment = Assignment::create([
+                'assignment_id' => Str::uuid(),
+                'sub_list_id' => $validated['sub_list_id'],
+                'title' => $validated['title'],
+                'content' => $validated['content'],
+                'type' => $validated['type'],
+                'isSimultaneous' => $validated['isSimultaneous'] ?? false,
+                'show_result' => $validated['show_result'] ?? false,
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+                'status' => $validated['status'],
+            ]);
 
-        $assignment = Assignment::create([
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'type' => $validated['type'],
-            'start_time' => $validated['start_time'],
-            'end_time' => $validated['end_time'],
-            'is_simultaneous' => $validated['is_simultaneous'] ?? false,
-            'created_by' => Auth::id()
-        ]);
-
-        $assignment->classes()->attach($validated['class_ids']);
-
-        return redirect()->route('assignments.index')
-            ->with('success', 'Assignment created successfully.');
+            return response()->json([
+                'message' => 'Tạo bài tập thành công',
+                'assignment' => $assignment
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Lỗi xác thực dữ liệu tạo bài tập:', ['errors' => $e->errors()]);
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi tạo bài tập: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'message' => 'Lỗi khi tạo bài tập',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
+
 
     public function storeAss(Request $request)
     {
@@ -116,7 +146,7 @@ class AssignmentController extends Controller
             'isSimultaneous' => 'required|integer|in:0,1',
             'start_time' => 'nullable|date',
             'end_time' => 'nullable|date|after_or_equal:start_time',
-            'show_result' =>  'required|boolean'  ,
+            'show_result' => 'required|boolean',
             'status' => 'required|string|in:' . implode(',', Assignment::getAllowedStatuses()),
         ]);
 
@@ -133,17 +163,17 @@ class AssignmentController extends Controller
             'status' => $request->status,
         ]);
         $students = DB::table('assignment')
-        ->join('sub_list','assignment.sub_list_id','=','sub_list.sub_list_id')
-        ->join('sub_list_question', 'sub_list.sub_list_id', '=', 'sub_list_question.sub_list_id')
-        ->join('question', 'sub_list_question.question_id', '=', 'question.question_id')
-        ->join('list_question', 'question.list_question_id', '=', 'list_question.list_question_id')
-        ->join('classroom', 'list_question.course_id', '=', 'classroom.course_id')
-        ->join('student_class', 'classroom.class_id', '=', 'student_class.class_id')
-        ->join('student', 'student_class.student_id', '=', 'student.student_id')
-        ->where('assignment.assignment_id', $assignment->assignment_id)
-        ->select('student.full_name', 'student.school_email')
-        ->distinct()
-        ->get();
+            ->join('sub_list', 'assignment.sub_list_id', '=', 'sub_list.sub_list_id')
+            ->join('sub_list_question', 'sub_list.sub_list_id', '=', 'sub_list_question.sub_list_id')
+            ->join('question', 'sub_list_question.question_id', '=', 'question.question_id')
+            ->join('list_question', 'question.list_question_id', '=', 'list_question.list_question_id')
+            ->join('classroom', 'list_question.course_id', '=', 'classroom.course_id')
+            ->join('student_class', 'classroom.class_id', '=', 'student_class.class_id')
+            ->join('student', 'student_class.student_id', '=', 'student.student_id')
+            ->where('assignment.assignment_id', $assignment->assignment_id)
+            ->select('student.full_name', 'student.school_email')
+            ->distinct()
+            ->get();
 
         $mailFailed = false;
 

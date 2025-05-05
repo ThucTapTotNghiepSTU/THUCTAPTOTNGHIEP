@@ -33,15 +33,15 @@ class Classroom extends Model
 
         static::creating(function ($classroom) {
             $classroom->class_id = (string) Str::uuid();
-            $classroom->updateSearchableText();
+           /*  $classroom->updateSearchableText(); */
         });
 
-        static::updating(function ($classroom) {
+       /*  static::updating(function ($classroom) {
             $classroom->updateSearchableText();
-        });
+        }); */
     }
 
-    protected function updateSearchableText()
+    /* protected function updateSearchableText()
     {
         $searchableFields = [
             $this->class_code,
@@ -58,7 +58,7 @@ class Classroom extends Model
             ->join(' ');
 
         $this->searchable_text = $searchableText;
-    }
+    } */
 
     protected $casts = [
         'class_duration' => 'integer',

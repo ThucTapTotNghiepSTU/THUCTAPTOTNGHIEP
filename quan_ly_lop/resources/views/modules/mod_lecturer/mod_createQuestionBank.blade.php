@@ -1,367 +1,257 @@
 <style>
-    /* Thiết lập màu sắc chủ đạo */
-    :root {
-        --primary-color: #4e73df;
-        --secondary-color: #1cc88a;
-        --danger-color: #e74a3b;
-        --light-color: #f8f9fc;
-        --dark-color: #5a5c69;
-        --border-color: #e3e6f0;
+    .create-question-modal {
+        max-width: 800px;
     }
 
-    /* Thiết lập font chữ và màu nền chung */
-    body {
-        font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background-color: #f8f9fc;
-        color: #5a5c69;
-    }
-
-    /* Cải thiện container chính */
-    .container.py-4 {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
-    /* Cải thiện card chính */
-    .card.shadow-lg {
-        border: none;
-        border-radius: 0.75rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card.shadow-lg:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
-    }
-
-    .card-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
-        border-radius: 0.75rem 0.75rem 0 0;
-        padding: 1.25rem;
-    }
-
-    .card-header h4 {
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-
-    .card-body {
-        padding: 2rem;
-    }
-
-    /* Cải thiện form elements */
-    .form-label {
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control,
-    .form-select {
-        border-radius: 0.5rem;
-        border: 1px solid var(--border-color);
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-    }
-
-    /* Cải thiện buttons */
-    .btn {
-        border-radius: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #224abe 0%, var(--primary-color) 100%);
-        transform: translateY(-2px);
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, var(--secondary-color) 0%, #13855c 100%);
-        border: none;
-    }
-
-    .btn-success:hover {
-        background: linear-gradient(135deg, #13855c 0%, var(--secondary-color) 100%);
-        transform: translateY(-2px);
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, #be2617 100%);
-        border: none;
-    }
-
-    .btn-danger:hover {
-        background: linear-gradient(135deg, #be2617 0%, var(--danger-color) 100%);
-        transform: translateY(-2px);
-    }
-
-    .btn-outline-secondary {
-        border: 1px solid var(--border-color);
-        color: var(--dark-color);
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: var(--light-color);
-        color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    /* Cải thiện options section */
-    #options-section {
-        background-color: var(--light-color);
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        margin-top: 1rem;
+    .create-question-modal .modal-body {
+        padding: 20px;
     }
 
     .option {
-        background-color: white;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 10px;
+    }
+
+    #options-container input[type="text"] {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+
+    #temporaryQuestionsList {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+
+    .modal-xl {
+        max-width: 90%;
+    }
+
+    .modal-content {
+        background: linear-gradient(145deg, #ffffff, #f6f9fc);
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-column {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .modal-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #e0e7ff;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         transition: transform 0.2s ease;
     }
 
-    .option:hover {
-        transform: translateX(5px);
+    .modal-section:hover {
+        transform: translateY(-2px);
     }
 
-    /* Cải thiện temporary questions section */
-    #temporaryQuestionsSection {
-        background-color: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    .modal-section h6 {
+        margin-bottom: 15px;
+        color: #1e3a8a;
+        font-weight: 600;
     }
 
-    #temporaryQuestionsSection h5 {
-        color: var(--primary-color);
-        font-weight: 700;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--border-color);
+    .form-label {
+        font-weight: 500;
+        color: #2d3748;
     }
 
-    #temporaryQuestionsList .mb-2 {
-        background-color: var(--light-color);
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
+    .form-select,
+    .form-check-input {
+        margin-top: 5px;
+        border-color: #cbd5e1;
     }
 
-    #temporaryQuestionsList .mb-2:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    .form-select:focus,
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    #temporaryQuestionsList strong {
-        color: var(--primary-color);
-        font-size: 1.1rem;
+    .question-list {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-top: 10px;
+        padding: 15px;
+        border: 1px solid #e0e7ff;
+        border-radius: 8px;
+        background-color: #f8fafc;
     }
 
-    #temporaryQuestionsList p {
-        margin-bottom: 0.5rem;
+    .selected-questions-list {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-top: 10px;
+        padding: 15px;
+        border: 1px solid #e0e7ff;
+        border-radius: 8px;
+        background-color: #f8fafc;
     }
 
-    #temporaryQuestionsList ul {
-        list-style-type: none;
-        padding-left: 0;
+    .topic-group {
+        margin-bottom: 20px;
     }
 
-    #temporaryQuestionsList li {
-        padding: 0.5rem 0;
-        border-bottom: 1px dashed var(--border-color);
+    .topic-group h5 {
+        background-color: #e0e7ff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        color: #1e40af;
     }
 
-    #temporaryQuestionsList li:last-child {
+    .question-item {
+        padding: 10px;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #ffffff;
+        transition: background-color 0.2s;
+    }
+
+    .question-item:hover {
+        background-color: #f1f5f9;
+    }
+
+    .question-item:last-child {
         border-bottom: none;
     }
 
-    /* Cải thiện alerts */
+    .question-item label {
+        cursor: pointer;
+        display: block;
+    }
+
+    .random-topics-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .random-topic-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: #edf2ff;
+        padding: 8px 12px;
+        border-radius: 5px;
+    }
+
+    .topic-random-input {
+        width: 60px;
+        padding: 5px;
+        border-color: #cbd5e1;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e2e8f0;
+        padding: 15px;
+        background-color: #f8fafc;
+    }
+
+    .form-check {
+        margin-bottom: 10px;
+    }
+
+    .btn-primary {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+    .btn-primary:disabled {
+        background-color: #6b7280;
+        border-color: #6b7280;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background-color: #6b7280;
+        border-color: #6b7280;
+    }
+
+    .btn-secondary:hover {
+        background-color: #4b5563;
+        border-color: #4b5563;
+    }
+
     .alert {
-        border-radius: 0.5rem;
-        border: none;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1.5rem;
+        margin-top: 10px;
     }
 
-    .alert-success {
-        background-color: rgba(28, 200, 138, 0.1);
-        color: var(--secondary-color);
-    }
-
-    .alert-danger {
-        background-color: rgba(231, 74, 59, 0.1);
-        color: var(--danger-color);
-    }
-
-    /* Cải thiện form select */
-    #courseSelect {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a5c69' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 1rem;
-        padding-right: 2.5rem;
-    }
-
-    /* Cải thiện radio buttons */
-    .form-check-input {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-top: 0.25rem;
-        cursor: pointer;
-    }
-
-    .form-check-input:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    /* Cải thiện textarea */
-    textarea.form-control {
-        min-height: 120px;
-        resize: vertical;
-    }
-
-    /* Cải thiện responsive */
     @media (max-width: 768px) {
-        .container.py-4 {
-            padding: 1rem;
+        .modal-xl {
+            max-width: 100%;
         }
 
-        .card-body {
-            padding: 1.5rem;
+        .modal-body {
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
         }
 
-        .btn {
-            padding: 0.5rem 1rem;
+        .modal-column {
+            width: 100%;
+            min-width: unset;
+        }
+
+        .modal-section {
+            margin-bottom: 15px;
+            padding: 12px;
+        }
+
+        .question-list,
+        .selected-questions-list {
+            max-height: 300px;
+        }
+
+        .topic-random-input {
+            width: 50px;
         }
     }
 
-    /* Animation cho các phần tử */
-    .animate__animated {
-        animation-duration: 0.5s;
+    .modal-header {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 15px 20px;
+        background-color: #f8fafc;
     }
 
-    /* Cải thiện scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1e3a8a;
     }
 
-    ::-webkit-scrollbar-track {
-        background: var(--light-color);
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: var(--primary-color);
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #224abe;
-    }
-
-    .card h5 {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #343a40;
-    }
-
-    .card p {
-        margin-bottom: 0.5rem;
-    }
-
-    .card .card-body {
-        padding: 1.25rem;
-    }
-
-    .card-hover {
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-    }
-
-    /* Dải màu đầu thẻ */
-    .card-hover::before {
-        content: "";
-        cursor: pointer;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background-color: #007bff;
-        /* Màu mặc định */
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
-        transition: background-color 0.3s ease;
-    }
-
-    /* Mũi tên */
-    .card-hover::after {
-        content: '→';
-        position: absolute;
-        bottom: 16px;
-        right: 16px;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
-        font-size: 1.8rem;
-        color: #007bff;
-        pointer-events: none;
-    }
-
-    /* Hover đồng bộ cả 2 */
-    .card-hover:hover::before {
-        background-color: #28a745;
-        /* Dải màu đổi */
-    }
-
-    .card-hover:hover::after {
-        opacity: 1;
-        transform: translateY(0);
-        color: #28a745;
-        /* Mũi tên đổi màu luôn cho đồng bộ */
-    }
-
-
-    .card-text strong {
-        color: #495057;
-    }
-
-    #courseFilter {
-        width: 250px;
-        border-color: #343a40;
-    }
-
-    #courseSelect {
-        width: fit-content;
-        border-color: #343a40;
-    }
-
-    #startCreateQuestion {
-        width: 250px;
+    .btn-close {
+        padding: 10px;
+        background-color: #e2e8f0;
+        border-radius: 50%;
     }
 </style>
+
 <div class="container py-4">
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -370,459 +260,1137 @@
         </div>
     @endif
 
-    <div class="row justify-content-start">
-        <div class="col-md-10">
-            @auth
-                <form id="courseForm" action="/api/questions/create" method="POST">
-                    @csrf
-                    <div class="d-flex flex-column container-sm">
-                        <select name="course_id_createQuestion" id="courseSelect" class="form-select">
-                            <option selected disabled>Bắt đầu tạo bộ câu hỏi với môn học</option>
+    @auth
+        <!-- MODAL tạo mã đề -->
+        <div class="modal fade" id="createSublistModal" tabindex="-1" aria-labelledby="createSublistModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <form id="createSublistForm">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createSublistModalLabel">Tạo đề thi mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body d-flex flex-wrap gap-3 p-4">
+                            <div class="modal-column" style="flex: 0 0 30%;">
+                                <div class="modal-section mb-4 p-3 border rounded bg-white shadow-sm">
+                                    <h6 class="mb-3">Thông tin đề thi</h6>
+                                    <div class="mb-3">
+                                        <label for="modal_sublist_title" class="form-label">Tiêu đề đề thi <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="modal_sublist_title"
+                                            name="modal_sublist_title" required placeholder="Nhập tiêu đề đề thi">
+                                        <small class="form-text text-muted">Tiêu đề giúp bạn nhận diện đề thi dễ
+                                            dàng.</small>
+                                    </div>
+                                    <div class="mb-3 d-flex gap-2">
+                                        <div style="flex: 1;">
+                                            <label for="modal_course_id" class="form-label">Môn học <span
+                                                    class="text-danger">*</span></label>
+                                            <select class="form-select" id="modal_course_id" name="modal_course_id"
+                                                required>
+                                                <option value="">Chọn môn học</option>
+                                                @foreach($courses as $course)
+                                                    <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <small class="form-text text-muted">Chọn môn học để xem danh sách câu
+                                                hỏi.</small>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label for="modal_list_question_id" class="form-label">Bộ câu hỏi</label>
+                                            <select class="form-select" id="modal_list_question_id"
+                                                name="modal_list_question_id">
+                                                <option value="">Tất cả bộ câu hỏi</option>
+                                            </select>
+                                            <small class="form-text text-muted">Chọn bộ câu hỏi để lọc (tùy chọn).</small>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="modal_question_type" class="form-label">Loại câu hỏi <span
+                                                class="text-danger">*</span></label>
+                                        <select class="form-select" id="modal_question_type" name="modal_question_type"
+                                            required>
+                                            <option value="">Chọn loại câu hỏi</option>
+                                            <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                            <option value="Tự luận">Tự luận</option>
+                                        </select>
+                                        <small class="form-text text-muted">Chọn loại câu hỏi cho đề thi.</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="modal_topic" class="form-label">Chủ đề</label>
+                                        <select class="form-select" id="modal_topic" name="modal_topic">
+                                            <option value="">Tất cả chủ đề</option>
+                                        </select>
+                                        <small class="form-text text-muted">Chọn chủ đề để lọc câu hỏi (tùy chọn).</small>
+                                    </div>
+                                </div>
+                                <div class="modal-section mb-4 p-3 border rounded bg-white shadow-sm">
+                                    <h6 class="mb-3">Random câu hỏi theo chủ đề</h6>
+                                    <div id="random_topics" class="random-topics-container"></div>
+                                    <small class="form-text text-muted">Nhập số lượng câu hỏi muốn chọn ngẫu nhiên theo từng
+                                        chủ đề.</small>
+                                </div>
+                                <div class="modal-section mb-4 p-3 border rounded bg-white shadow-sm">
+                                    <h6 class="mb-3">Cài đặt</h6>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isShuffle" checked>
+                                        <label class="form-check-label" for="isShuffle">Trộn thứ tự câu hỏi</label>
+                                        <small class="form-text text-muted">Bật để sắp xếp ngẫu nhiên thứ tự câu hỏi trong
+                                            đề thi.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-column" style="flex: 0 0 35%;">
+                                <div class="modal-section mb-4 p-3 border rounded bg-white shadow-sm">
+                                    <h6 class="mb-3">Danh sách câu hỏi</h6>
+                                    <div id="question_list" class="question-list">
+                                        <p class="text-muted">Vui lòng chọn môn học và loại câu hỏi để hiển thị danh sách
+                                            câu hỏi.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-column" style="flex: 0 0 30%;">
+                                <div class="modal-section mb-4 p-3 border rounded bg-white shadow-sm">
+                                    <h6 class="mb-3">Câu hỏi đã chọn</h6>
+                                    <div id="selected_questions_list" class="selected-questions-list">
+                                        <p class="text-muted">Chưa có câu hỏi nào được chọn.</p>
+                                    </div>
+                                    <div id="question_type_error" class="alert alert-danger d-none" role="alert">
+                                        Lỗi: Không được chọn cả câu hỏi Trắc nghiệm và Tự luận trong cùng một đề thi!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary" id="create_sublist_submit" disabled>Tạo mã
+                                đề</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- MODAL tạo bộ câu hỏi -->
+        <div class="modal fade" id="createListQuestionModal" tabindex="-1" aria-labelledby="createListQuestionModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog create-question-modal">
+                <div class="modal-content">
+                    <form id="createListQuestionForm" novalidate>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createListQuestionModalLabel">Tạo bộ câu hỏi mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="course_id" class="form-label">Môn học</label>
+                                <select class="form-select" id="course_id" name="course_id" required>
+                                    <option value="">Chọn môn học</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3" id="topic_container" style="display: none;">
+                                <label for="topic" class="form-label">Chủ đề</label>
+                                <select class="form-select" id="topic_select" name="topic_select">
+                                    <option value="">Chọn chủ đề</option>
+                                    <option value="new">Nhập chủ đề mới</option>
+                                </select>
+                                <input type="text" class="form-control mt-2" id="topic_input" name="topic"
+                                    style="display: none;" placeholder="Nhập chủ đề mới">
+                            </div>
+                            <div id="temporaryQuestionsSection" class="mb-4" style="display: none;">
+                                <h5>Câu hỏi đã lưu tạm thời:</h5>
+                                <div id="temporaryQuestionsList"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" id="startCreateQuestion" class="btn btn-primary">Tạo bộ câu hỏi</button>
+                        </div>
+                    </form>
+                    <div class="card shadow-lg" id="questionFormCard" style="display: none;">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h4 class="mb-0">Tạo Câu Hỏi Trắc Nghiệm</h4>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="createQuestionForm">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label fw-bold">Tiêu Đề Câu Hỏi</label>
+                                    <input type="text" id="title" name="title" class="form-control"
+                                        placeholder="Nhập tiêu đề câu hỏi" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="content" class="form-label fw-bold">Nội Dung Câu Hỏi</label>
+                                    <textarea id="content" name="content" class="form-control" rows="4"
+                                        placeholder="Nhập nội dung câu hỏi" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="type" class="form-label fw-bold">Loại Câu Hỏi</label>
+                                    <select id="type" name="type" class="form-select" required>
+                                        <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                        <option value="Tự luận">Tự luận</option>
+                                    </select>
+                                </div>
+                                <div id="options-section" class="mb-3">
+                                    <label class="form-label fw-bold">Đáp Án</label>
+                                    <div id="options-container">
+                                        <div class="d-flex align-items-center mb-2 option">
+                                            <input type="text" name="options[0][option_text]" class="form-control me-2"
+                                                placeholder="Nhập đáp án 1" required>
+                                            <input type="radio" name="correct_answer" value="0" class="form-check-input">
+                                            <span class="ms-2">Đáp án đúng</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-secondary mt-2" onclick="addOption()">+
+                                        Thêm Lựa Chọn</button>
+                                </div>
+                                <div class="text-center">
+                                    <button type="button" id="saveQuestion" class="btn btn-primary w-100 mt-3" disabled>Tạo
+                                        Thêm Câu Hỏi</button>
+                                    <button type="button" id="finishCreating" class="btn btn-success w-100 mt-3"
+                                        disabled>Hoàn Thành</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="createQuestionBankModal" tabindex="-1" aria-labelledby="createQuestionBankModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createQuestionBankModalLabel">Tạo đề thi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createQuestionBankForm">
+                            <div class="mb-3">
+                                <label for="course_id" class="form-label">Khóa học</label>
+                                <select class="form-select" id="course_id" name="course_id" required>
+                                    <option value="">Chọn khóa học</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exam_name" class="form-label">Tên đề thi</label>
+                                <input type="text" class="form-control" id="exam_name" name="exam_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="topic" class="form-label">Chủ đề</label>
+                                <select class="form-select" id="topic" name="topic">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="question_type" class="form-label">Loại câu hỏi</label>
+                                <select class="form-select" id="question_type" name="question_type">
+                                    <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                    <option value="Tự luận">Tự luận</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Danh sách câu hỏi</label>
+                                <div id="question_list" class="border p-3" style="max-height: 300px; overflow-y: auto;">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Câu hỏi đã chọn</label>
+                                <div id="selected_questions_list" class="border p-3"
+                                    style="max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+                            <div id="error-message" class="text-danger"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" id="saveQuestionBank">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <button type="button" class="btn btn-primary mb-4" onclick="createSublist()">Tạo đề thi</button>
+            <button type="button" class="btn btn-primary mb-4" onclick="showCreateListQuestionModal()">Tạo bộ câu hỏi
+                mới</button>
+        </div>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="list-question-tab" data-bs-toggle="tab" data-bs-target="#list-question"
+                    type="button" role="tab" aria-controls="list-question" aria-selected="true">Danh sách bộ câu
+                    hỏi</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sublist-tab" data-bs-toggle="tab" data-bs-target="#sublist" type="button"
+                    role="tab" aria-controls="sublist" aria-selected="false">Danh sách mã đề</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="list-question" role="tabpanel" aria-labelledby="list-question-tab">
+                <div class="flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-4">Danh sách bộ câu hỏi</h3>
+                    <div class="d-flex gap-3">
+                        <select name="course_id" id="courseFilter"
+                            class="form-select bg-body-secondary text-black p-3 border-dark">
+                            <option value="all" selected>Tất cả</option>
                             @foreach($courses as $course)
                                 <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
                             @endforeach
                         </select>
-                        <button type="submit" id="startCreateQuestion" class="btn btn-primary mt-3 " disabled>
-                            Bắt đầu tạo bộ câu hỏi
-                        </button>
-                    </div>
-
-                </form>
-
-                <div id="temporaryQuestionsSection" class="mb-4" style="display: none;">
-                    <h5>Câu hỏi đã lưu tạm thời:</h5>
-                    <div id="temporaryQuestionsList"></div>
-                </div>
-
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card shadow-lg animate__animated animate__fadeIn" style="display: none;">
-                            <div class="card-header bg-primary text-white text-center">
-                                <h4 class="mb-0">Tạo Câu Hỏi Trắc Nghiệm</h4>
-                            </div>
-                            <div class="card-body p-4">
-                                <form id="createQuestionForm" action="{{ route('questions.store') }}" method="POST">
-                                    @csrf
-                                    <!-- Tiêu đề câu hỏi -->
-                                    <div class="mb-3">
-                                        <label for="title" class="form-label fw-bold">Tiêu Đề Câu Hỏi</label>
-                                        <input type="text" id="title" name="title" class="form-control"
-                                            placeholder="Nhập tiêu đề câu hỏi" required>
-                                    </div>
-                                    <!-- Nội dung câu hỏi -->
-                                    <div class="mb-3">
-                                        <label for="content" class="form-label fw-bold">Nội Dung Câu Hỏi</label>
-                                        <textarea id="content" name="content" class="form-control" rows="4"
-                                            placeholder="Nhập nội dung câu hỏi" required></textarea>
-                                    </div>
-                                    <!-- Loại câu hỏi -->
-                                    <div class="mb-3">
-                                        <label for="type" class="form-label fw-bold">Loại Câu Hỏi</label>
-                                        <select id="type" name="type" class="form-select" required>
-                                            <option value="Trắc nghiệm">Trắc nghiệm</option>
-                                            <option value="Tự luận">Tự luận</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- Đáp án (Hiển thị nếu là Trắc nghiệm) -->
-                                    <div id="options-section" class="mb-3">
-                                        <label class="form-label fw-bold">Đáp Án</label>
-                                        <div id="options-container">
-                                            <div class="d-flex align-items-center mb-2 option">
-                                                <input type="text" name="options[0][option_text]" class="form-control me-2"
-                                                    placeholder="Nhập đáp án 1" required>
-                                                <input type="radio" name="correct_answer" value="0"
-                                                    class="form-check-input">
-                                                <span class="ms-2">Đáp án đúng</span>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-secondary mt-2" onclick="addOption()">+
-                                            Thêm Lựa Chọn</button>
-                                    </div>
-
-                                    <!-- Nút gửi form -->
-                                    <div class="text-center">
-                                        <button type="button" id="saveQuestion" class="btn btn-primary w-100 mt-3">Tạo Thêm
-                                            Câu Hỏi</button>
-                                        <button type="button" id="finishCreating" class="btn btn-success w-100 mt-3">Hoàn
-                                            Thành</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                        <select name="topic_filter" id="topicFilter"
+                            class="form-select bg-body-secondary text-black p-3 border-dark">
+                            <option value="all" selected>Tất cả chủ đề</option>
+                        </select>
                     </div>
                 </div>
-            @endauth
+                <div id="list-question-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 cursor-pointer">
+                </div>
+            </div>
+            <div class="tab-pane fade" id="sublist" role="tabpanel" aria-labelledby="sublist-tab">
+                <div class="flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-4">Danh sách mã đề</h3>
+                    <select name="course_id" id="sublistCourseFilter"
+                        class="form-select bg-body-secondary text-black p-3 border-dark">
+                        <option value="all" selected>Tất cả</option>
+                        @foreach($courses as $course)
+                            <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="sublist-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
+            </div>
         </div>
-    </div>
-
-    <div class="container mt-3">
-        <div class="flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-4 ">Danh sách câu hỏi</h3>
-            <select name="course_id" id="courseFilter" class="form-select">
-                <option value="all" selected>Tất cả</option>
-                @foreach($courses as $course)
-                    <option value="{{ $course->course_id }}">{{ $course->course_name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div id="list-question-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 cursor-pointer">
-            <!-- Cards sẽ được render ở đây -->
-        </div>
-    </div>
+    @endauth
 </div>
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="lecturer-id" content="{{ Auth::user()->lecturer_id }}">
+
 <script>
+    function createSublist() {
+        const modal = new bootstrap.Modal(document.getElementById('createSublistModal'));
+        modal.show();
+    }
+    function showCreateListQuestionModal() {
+        const modal = new bootstrap.Modal(document.getElementById('createListQuestionModal'));
+        modal.show();
+    }
     document.addEventListener("DOMContentLoaded", function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const startButton = document.getElementById("startCreateQuestion");
-        const temporaryQuestionsList = document.getElementById("temporaryQuestionsList");
-        const saveQuestionButton = document.getElementById("saveQuestion");
-        const finishCreatingButton = document.getElementById("finishCreating");
-        const questionForm = document.querySelector('.card.shadow-lg');
-        const temporaryQuestionsSection = document.getElementById('temporaryQuestionsSection');
-        let optionCount = 1;
-        const courseId = 'bb18b2e3-b400-44f9-ae2a-d72853575eb3';
         const lecturerId = document.querySelector('meta[name="lecturer-id"]').getAttribute('content');
-        const filterSelect = document.getElementById('courseFilter');
-        const courseSelect = document.getElementById("courseFilter");
-        const courseToCreateQuestion = document.getElementById("courseSelect");
-        const courseFilter = document.getElementById("courseFilter");
-        const container = document.getElementById("list-question-container");
-        // Kiểm tra xem đã có list_question_id chưa
-        const existingListQuestionId = localStorage.getItem("list_question_id");
-        const submitBtn = document.getElementById("startCreateQuestion");
-        if (existingListQuestionId) {
-            questionForm.style.display = 'block';
-            temporaryQuestionsSection.style.display = 'block';
-            renderTemporaryQuestions();
-        }
-        function fetchListQuestions(courseId = "null") {
-            let url = `/api/list-questions/${lecturerId}`;
-            if (courseId !== "null" && courseId !== "all") {
-                url += `?course_id=${courseId}`;
+        let optionCount = 1;
+        let isSubmitting = false;
+
+        const createListQuestionModal = document.getElementById('createListQuestionModal');
+        createListQuestionModal.addEventListener('hidden.bs.modal', function () {
+            localStorage.removeItem('list_question_id');
+            localStorage.removeItem('questions');
+            document.getElementById('questionFormCard').style.display = 'none';
+            document.getElementById('temporaryQuestionsSection').style.display = 'none';
+            document.getElementById('saveQuestion').disabled = true;
+            document.getElementById('finishCreating').disabled = true;
+            isSubmitting = false;
+        });
+
+        function attachFormSubmitHandler() {
+            const form = document.getElementById('createListQuestionForm');
+            if (form) {
+                form.removeEventListener('submit', formSubmitHandler);
+                form.addEventListener('submit', formSubmitHandler);
+            } else {
+                console.error('Cannot find form #createListQuestionForm when attaching submit handler');
             }
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById("list-question-container");
-                    container.innerHTML = "";
-                    if (data.length === 0) {
-                        container.innerHTML = `<p class="text-muted">Chưa có bộ câu hỏi nào cho môn học này.</p>`;
-                        return;
+        }
+
+        function formSubmitHandler(e) {
+            e.preventDefault();
+            if (isSubmitting) {
+                return;
+            }
+            isSubmitting = true;
+
+            const existingListQuestionId = localStorage.getItem('list_question_id');
+            if (existingListQuestionId) {
+                const questionFormCard = document.getElementById('questionFormCard');
+                const temporaryQuestionsSection = document.getElementById('temporaryQuestionsSection');
+                if (questionFormCard && temporaryQuestionsSection) {
+                    questionFormCard.style.display = 'block';
+                    temporaryQuestionsSection.style.display = 'block';
+                    document.getElementById('saveQuestion').disabled = false;
+                    document.getElementById('finishCreating').disabled = false;
+                    renderTemporaryQuestions();
+                }
+                isSubmitting = false;
+                return;
+            }
+
+            const courseId = document.getElementById('course_id').value;
+            const topicSelect = document.getElementById('topic_select');
+            const topicInput = document.getElementById('topic_input');
+            let topic = topicSelect.value === 'new' ? topicInput.value.trim() : topicSelect.value;
+
+            if (!courseId || !topic) {
+                alert('Vui lòng chọn môn học và chủ đề!');
+                isSubmitting = false;
+                return;
+            }
+
+            fetch('/api/list-questions/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    topic: topic,
+                    lecturer_id: lecturerId
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    data.forEach(item => {
-                        const card = document.createElement("div");
-                        card.className = "col";
-                        const lecturerName = item.lecturer?.fullname || "Không rõ";
-                        const courseName = item.course?.course_name || "Không rõ";
-                        card.innerHTML = `
-                    <div class="card h-100 shadow-sm card-hover position-relative" data-id="${item.list_question_id}">
-                        <div class="card-body">
-                            <p class="card-text"><strong>Môn học:</strong> ${courseName}</p>
-                            <p class="card-text"><strong>Giảng viên:</strong> ${lecturerName}</p>
-                            <p class="card-text"><small class="text-muted">Tạo lúc: ${new Date(item.created_at).toLocaleString()}</small></p>
-                        </div>
-                    </div>
-                `;
-                        const cardElement = card.querySelector('.card');
-                        cardElement.addEventListener("click", () => {
-                            const listQuestionId = cardElement.getAttribute("data-id");
-                            window.location.href = `/lecturer/chi_tiet_bo_cau_hoi/${listQuestionId}`;
-                        });
-                        container.appendChild(card);
-                    });
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('list_question_id', data.list_question_id);
+                        const questionFormCard = document.getElementById('questionFormCard');
+                        const temporaryQuestionsSection = document.getElementById('temporaryQuestionsSection');
+                        if (questionFormCard && temporaryQuestionsSection) {
+                            questionFormCard.style.display = 'block';
+                            temporaryQuestionsSection.style.display = 'block';
+                            document.getElementById('saveQuestion').disabled = false;
+                            document.getElementById('finishCreating').disabled = false;
+                            renderTemporaryQuestions();
+                        } else {
+                            console.error('Missing DOM elements:', {
+                                questionFormCard: !!questionFormCard,
+                                temporaryQuestionsSection: !!temporaryQuestionsSection
+                            });
+                            alert('Lỗi giao diện: Không thể hiển thị form tạo câu hỏi!');
+                        }
+                    } else {
+                        alert(`Lỗi từ server: ${data.message || 'Không thể tạo bộ câu hỏi!'}`);
+                    }
                 })
                 .catch(error => {
-                    console.error("Lỗi khi lấy danh sách câu hỏi:", error);
-                    document.getElementById("list-question-container").innerHTML =
-                        `<p class="text-danger">Không thể tải dữ liệu. Vui lòng thử lại sau.</p>`;
+                    console.error('API error:', error);
+                    alert(`Lỗi kết nối: ${error.message}`);
+                })
+                .finally(() => {
+                    isSubmitting = false;
+                    const startCreateQuestionBtn = document.getElementById('startCreateQuestion');
+                    if (startCreateQuestionBtn) {
+                        startCreateQuestionBtn.disabled = false;
+                    }
                 });
         }
-        courseFilter.addEventListener("change", function () {
-            const selectedValue = this.value;
-            const courseId = selectedValue === "all" ? "null" : selectedValue;
-            fetchListQuestions(courseId); // chỉ fetch danh sách
-        });
-        //lọc card
-        courseToCreateQuestion.addEventListener("change", function () {
-            if (this.value) {
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
+
+        attachFormSubmitHandler();
+
+        const startCreateQuestionBtn = document.getElementById('startCreateQuestion');
+        if (startCreateQuestionBtn) {
+            startCreateQuestionBtn.addEventListener('click', function (e) {
+                const form = document.getElementById('createListQuestionForm');
+                if (form) {
+                    this.disabled = true;
+                    form.dispatchEvent(new Event('submit'));
+                } else {
+                    console.error('Form #createListQuestionForm not found when button clicked');
+                }
+            });
+        } else {
+            console.error('Cannot find button #startCreateQuestion');
+        }
+
+        document.getElementById('createQuestionForm')?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
             }
         });
-        window.addEventListener("DOMContentLoaded", () => {
-            fetchListQuestions(); // load tất cả môn học khi chưa chọn gì
-        });
-        // Hiển thị câu hỏi đã lưu từ localStorage
-        function renderTemporaryQuestions() {
-            const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
-            temporaryQuestionsList.innerHTML = '';
 
-            if (savedQuestions.length > 0) {
-                savedQuestions.forEach((question, index) => {
-                    const questionDiv = document.createElement('div');
-                    questionDiv.classList.add('mb-2');
-                    questionDiv.innerHTML = `
-                        <div>
-                            <strong>${question.title}</strong>
-                            <p>${question.content}</p>
-                            <p><em>Loại câu hỏi: ${question.type}</em></p>
-                            <ul>
-                                ${question.options.map(option =>
-                        `<li>${option.option_text} ${option.is_correct ? '(Đúng)' : ''}</li>`
-                    ).join('')}
-                            </ul>
-                            <button class="btn btn-danger btn-sm delete-question" data-index="${index}">
-                                Xóa câu hỏi
-                            </button>
-                            <hr>
-                        </div>
-                    `;
-                    temporaryQuestionsList.appendChild(questionDiv);
-                });
+        const courseToCreateQuestion = document.getElementById("course_id");
+        if (courseToCreateQuestion) {
+            courseToCreateQuestion.addEventListener('change', function () {
+                const courseId = this.value;
+                const topicContainer = document.getElementById('topic_container');
+                const topicSelect = document.getElementById('topic_select');
+                const topicInput = document.getElementById('topic_input');
+                const startCreateQuestion = document.getElementById('startCreateQuestion');
 
-                // Thêm event listeners cho nút xóa
-                document.querySelectorAll('.delete-question').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        deleteTemporaryQuestion(index);
-                    });
-                });
+                if (courseId) {
+                    topicContainer.style.display = 'block';
+                    fetch(`/api/list-questions/topics/${courseId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            topicSelect.innerHTML = '<option value="">Chọn chủ đề</option>';
+                            if (data.topics && data.topics.length > 0) {
+                                data.topics.forEach(topic => {
+                                    const option = document.createElement('option');
+                                    option.value = topic;
+                                    option.textContent = topic;
+                                    topicSelect.appendChild(option);
+                                });
+                            }
+                            const newOption = document.createElement('option');
+                            newOption.value = 'new';
+                            newOption.textContent = 'Nhập chủ đề mới';
+                            topicSelect.appendChild(newOption);
+                            startCreateQuestion.disabled = false;
+                        })
+                        .catch(error => console.error('Lỗi khi lấy danh sách topic:', error));
+                } else {
+                    topicContainer.style.display = 'none';
+                    startCreateQuestion.disabled = true;
+                }
+            });
+        }
+        document.getElementById('topic_select')?.addEventListener('change', function () {
+            const topicInput = document.getElementById('topic_input');
+            if (this.value === 'new') {
+                topicInput.style.display = 'block';
+                topicInput.focus();
             } else {
-                temporaryQuestionsList.innerHTML = "<p>Không có câu hỏi tạm thời nào.</p>";
+                topicInput.style.display = 'none';
+                topicInput.value = '';
             }
-        }
-
-        // Xóa một câu hỏi tạm thời
-        function deleteTemporaryQuestion(index) {
-            const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
-            savedQuestions.splice(index, 1);
-            localStorage.setItem('questions', JSON.stringify(savedQuestions));
-            renderTemporaryQuestions();
-        }
-
-        // Reset form sau khi lưu
-        function resetForm() {
-            document.getElementById('createQuestionForm').reset();
-            document.getElementById('options-container').innerHTML = `
-                <div class="d-flex align-items-center mb-2 option">
-                    <input type="text" name="options[0][option_text]" class="form-control me-2"
-                        placeholder="Nhập đáp án 1" required>
-                    <input type="radio" name="correct_answer" value="0"
-                        class="form-check-input">
-                    <span class="ms-2">Đáp án đúng</span>
-                </div>
-            `;
-            optionCount = 1;
-        }
-
-        // Hiển thị phần đáp án khi loại câu hỏi là "Trắc nghiệm"
-        document.getElementById('type').addEventListener('change', function () {
-            const optionsSection = document.getElementById('options-section');
-            optionsSection.style.display = this.value === 'Trắc nghiệm' ? 'block' : 'none';
         });
-
-        // Thêm lựa chọn mới cho câu hỏi trắc nghiệm - sửa lỗi addOption
-        function addOption() {
+        window.addOption = function () {
             const container = document.getElementById('options-container');
             const optionDiv = document.createElement('div');
             optionDiv.classList.add('d-flex', 'align-items-center', 'mb-2', 'option');
             optionDiv.innerHTML = `
-                <input type="text" name="options[${optionCount}][option_text]" class="form-control me-2"
-                    placeholder="Nhập đáp án ${optionCount + 1}" required>
-                <input type="radio" name="correct_answer" value="${optionCount}" class="form-check-input">
-                <span class="ms-2">Đáp án đúng</span>
-            `;
+            <input type="text" name="options[${optionCount}][option_text]" class="form-control me-2" placeholder="Nhập đáp án ${optionCount + 1}" required>
+            <input type="radio" name="correct_answer" value="${optionCount}" class="form-check-input">
+            <span class="ms-2">Đáp án đúng</span>
+        `;
             container.appendChild(optionDiv);
             optionCount++;
+        };
+        document.getElementById('type')?.addEventListener('change', function () {
+            document.getElementById('options-section').style.display = this.value === 'Trắc nghiệm' ? 'block' : 'none';
+        });
+        document.getElementById('saveQuestion')?.addEventListener('click', function () {
+            const listQuestionId = localStorage.getItem("list_question_id");
+            if (!listQuestionId) return alert("Vui lòng tạo bộ câu hỏi trước!");
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const type = document.getElementById('type').value;
+            if (!title || !content) return alert("Vui lòng nhập đầy đủ thông tin!");
+            const options = [];
+            let hasCorrectAnswer = false;
+            if (type === 'Trắc nghiệm') {
+                document.querySelectorAll('.option').forEach((optionElement, index) => {
+                    const optionText = optionElement.querySelector('input[type="text"]').value;
+                    const isCorrect = optionElement.querySelector('input[type="radio"]').checked;
+                    if (optionText) {
+                        options.push({ option_text: optionText, is_correct: isCorrect });
+                        if (isCorrect) hasCorrectAnswer = true;
+                    }
+                });
+                if (options.length < 2 || !hasCorrectAnswer) return alert("Trắc nghiệm cần ít nhất 2 đáp án và 1 đáp án đúng!");
+            }
+            const question = { title, content, type, options };
+            let savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+            savedQuestions.push(question);
+            localStorage.setItem('questions', JSON.stringify(savedQuestions));
+            resetForm();
+            renderTemporaryQuestions();
+        });
+        document.getElementById('finishCreating')?.addEventListener('click', function () {
+            const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+            const listQuestionId = localStorage.getItem("list_question_id");
+            if (savedQuestions.length === 0 || !listQuestionId) return alert("Chưa có câu hỏi nào hoặc bộ câu hỏi không tồn tại!");
+            fetch('/api/questions/batch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    list_question_id: listQuestionId,
+                    questions: savedQuestions
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.removeItem('questions');
+                        localStorage.removeItem('list_question_id');
+                        alert("Hoàn thành tạo bộ câu hỏi!");
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('createListQuestionModal'));
+                        modal.hide();
+                        fetchListQuestions();
+                    }
+                })
+                .catch(error => console.error('Lỗi:', error));
+        });
+        function resetForm() {
+            const form = document.getElementById('createQuestionForm');
+            if (form) {
+                form.reset();
+            } else {
+                console.error('Cannot find form #createQuestionForm for reset');
+                return;
+            }
+            const optionsContainer = document.getElementById('options-container');
+            if (optionsContainer) {
+                optionsContainer.innerHTML = `
+                <div class="d-flex align-items-center mb-2 option">
+                    <input type="text" name="options[0][option_text]" class="form-control me-2" placeholder="Nhập đáp án 1" required>
+                    <input type="radio" name="correct_answer" value="0" class="form-check-input">
+                    <span class="ms-2">Đáp án đúng</span>
+                </div>
+            `;
+            } else {
+                console.error('Cannot find options-container for reset');
+            }
+            optionCount = 1;
         }
 
-        // Gán hàm addOption vào window để có thể gọi từ onclick
-        window.addOption = addOption;
+        function renderTemporaryQuestions() {
+            const savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
+            const temporaryQuestionsList = document.getElementById("temporaryQuestionsList");
 
-        // Khởi động khi nhấn "Bắt đầu tạo câu hỏi"
-        if (startButton) {
-            startButton.addEventListener("click", function (e) {
-                e.preventDefault();
-                console.log("Start button clicked"); // Kiểm tra sự kiện click
+            if (!Array.isArray(savedQuestions) || savedQuestions.length === 0) {
+                temporaryQuestionsList.innerHTML = "<p>Không có câu hỏi tạm thời nào.</p>";
+                return;
+            }
 
-                const courseId = document.getElementById("courseSelect").value;
-                console.log("Course ID:", courseId); // Kiểm tra course ID
+            let html = '';
 
-                if (!courseId) {
-                    alert("Vui lòng chọn môn học trước khi tiếp tục!");
-                    return;
+            savedQuestions.forEach((q) => {
+                html += `
+                <div class="question-item">
+                    <strong>${q.title} (${q.type})</strong>
+                    <p>${q.content}</p>
+            `;
+
+                if (Array.isArray(q.options)) {
+                    html += '<ul>';
+                    q.options.forEach(option => {
+                        html += `<li>${option.option_text} ${option.is_correct == 1 ? '(Đúng)' : ''}</li>`;
+                    });
+                    html += '</ul>';
                 }
 
-                startButton.disabled = true;
-                startButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+                html += `
+                <button class="btn btn-danger btn-sm delete-question" data-id="${q.question_id}">Xóa</button>
+                <hr>
+                </div>
+            `;
+            });
 
-                console.log("Calling API endpoint: /api/list-questions");
-                console.log("Request body:", { course_id: courseId, lecturer_id: lecturerId });
+            temporaryQuestionsList.innerHTML = html;
 
-                console.log("CSRF Token:", csrfToken);
+            document.querySelectorAll('.delete-question').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    let questions = JSON.parse(localStorage.getItem('questions')) || [];
+                    questions = questions.filter(q => q.question_id !== id);
+                    localStorage.setItem('questions', JSON.stringify(questions));
+                    renderTemporaryQuestions(); // Re-render after delete
+                });
+            });
+        }
 
-                fetch("/api/list-questions/create", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": csrfToken
-                    },
-                    body: JSON.stringify({ course_id: courseId, lecturer_id: lecturerId })
-                })
+        document.addEventListener('DOMContentLoaded', renderTemporaryQuestions);
+
+        document.getElementById('courseFilter').addEventListener('change', function () {
+            const courseId = this.value;
+            const topicFilter = document.getElementById('topicFilter');
+            if (!topicFilter) {
+                console.error('Không tìm thấy phần tử topicFilter trong DOM');
+                return;
+            }
+            fetchListQuestions(courseId, 'all');
+            if (courseId !== 'all') {
+                fetch(`/api/list-questions/topics/${courseId}`)
                     .then(response => {
-                        console.log("Response status:", response.status);
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
+                        if (!response.ok) throw new Error('Lỗi khi lấy danh sách topic');
                         return response.json();
                     })
                     .then(data => {
-                        console.log("Response data:", data);
-                        if (data.id) {
-                            console.log("Saving list_question_id to localStorage:", data.id);
-                            localStorage.setItem("list_question_id", data.id);
-                            localStorage.setItem('questions', JSON.stringify([]));
-                            alert("Danh sách câu hỏi đã được tạo!");
-                            questionForm.style.display = 'block';
-                            temporaryQuestionsSection.style.display = 'block';
-                            renderTemporaryQuestions();
-                        } else {
-                            console.error("No id in response data:", data);
-                            alert(data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+                        topicFilter.innerHTML = '<option value="all" selected>Tất cả chủ đề</option>';
+                        if (data.topics && data.topics.length > 0) {
+                            data.topics.forEach(topic => {
+                                topicFilter.innerHTML += `<option value="${topic}">${topic}</option>`;
+                            });
                         }
                     })
+                    .catch(error => console.error('Lỗi khi lấy topic:', error));
+            } else {
+                topicFilter.innerHTML = '<option value="all" selected>Tất cả chủ đề</option>';
+            }
+        });
+        document.getElementById('topicFilter')?.addEventListener('change', function () {
+            const courseId = document.getElementById('courseFilter').value;
+            const topic = this.value;
+            fetchListQuestions(courseId, topic);
+        });
+        document.getElementById('modal_course_id').addEventListener('change', function () {
+            const courseId = this.value;
+            const listQuestionSelect = document.getElementById('modal_list_question_id');
+            const topicSelect = document.getElementById('modal_topic');
+            const randomTopics = document.getElementById('random_topics');
+            const questionType = document.getElementById('modal_question_type').value;
+
+            listQuestionSelect.innerHTML = '<option value="">Tất cả bộ câu hỏi</option>';
+            topicSelect.innerHTML = '<option value="">Tất cả chủ đề</option>';
+            randomTopics.innerHTML = '';
+
+            if (courseId) {
+                fetch(`/api/list-questions/${lecturerId}?course_id=${courseId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.list_question_id;
+                            option.textContent = item.topic || 'Bộ câu hỏi không có chủ đề';
+                            listQuestionSelect.appendChild(option);
+                        });
+
+                        if (questionType) {
+                            updateQuestionList(courseId, questionType, '', '');
+                            const topics = [...new Set(data.map(item => item.topic))];
+                            topics.forEach(topic => {
+                                const option = document.createElement('option');
+                                option.value = topic;
+                                option.textContent = topic;
+                                topicSelect.appendChild(option);
+                            });
+
+                            topics.forEach(topic => {
+                                const topicQuestions = data.filter(item => item.topic === topic);
+                                let questionCount = 0;
+                                topicQuestions.forEach(item => {
+                                    fetch(`/api/list-questions/detail/${item.list_question_id}`)
+                                        .then(res => res.json())
+                                        .then(detail => {
+                                            const questions = detail.data.questions.filter(q => q.type === questionType);
+                                            questionCount += questions.length;
+                                            const div = document.createElement('div');
+                                            div.className = 'random-topic-item';
+                                            div.innerHTML = `
+                                            <label>${topic} (${questionCount} câu)</label>
+                                            <input type="number" class="topic-random-input form-control form-control-sm" data-topic="${topic}" min="0" max="${questionCount}" placeholder="Số câu">
+                                        `;
+                                            randomTopics.appendChild(div);
+                                        })
+                                        .catch(error => console.error(`Lỗi khi lấy chi tiết list_question_id ${item.list_question_id}:`, error));
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Lỗi khi lấy danh sách list-questions:', error));
+            } else {
+                document.getElementById('question_list').innerHTML = '<p class="text-muted">Vui lòng chọn môn học và loại câu hỏi.</p>';
+            }
+        });
+        document.getElementById('modal_list_question_id').addEventListener('change', function () {
+            const courseId = document.getElementById('modal_course_id').value;
+            const listQuestionId = this.value;
+            const questionType = document.getElementById('modal_question_type').value;
+            const topic = document.getElementById('modal_topic').value;
+            if (courseId && questionType) {
+                updateQuestionList(courseId, questionType, topic, listQuestionId);
+            }
+        });
+        document.getElementById('modal_question_type').addEventListener('change', function () {
+            const courseId = document.getElementById('modal_course_id').value;
+            const listQuestionId = document.getElementById('modal_list_question_id').value;
+            const questionType = this.value;
+            const topic = document.getElementById('modal_topic').value;
+            if (courseId && questionType) {
+                updateQuestionList(courseId, questionType, topic, listQuestionId);
+                document.getElementById('modal_course_id').dispatchEvent(new Event('change'));
+            } else {
+                document.getElementById('question_list').innerHTML = '<p class="text-muted">Vui lòng chọn môn học và loại câu hỏi.</p>';
+            }
+        });
+        document.getElementById('modal_topic').addEventListener('change', function () {
+            const courseId = document.getElementById('modal_course_id').value;
+            const listQuestionId = document.getElementById('modal_list_question_id').value;
+            const questionType = document.getElementById('modal_question_type').value;
+            const topic = this.value;
+            if (courseId && questionType) {
+                updateQuestionList(courseId, questionType, topic, listQuestionId);
+            }
+        });
+        function updateQuestionList(courseId, questionType, topic = '', listQuestionId = '') {
+            const questionList = document.getElementById('question_list');
+            questionList.innerHTML = '<p class="text-muted">Đang tải câu hỏi...</p>';
+            fetch(`/api/list-questions/${lecturerId}?course_id=${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let filteredData = data;
+                    if (listQuestionId) {
+                        filteredData = data.filter(item => item.list_question_id === listQuestionId);
+                    }
+                    const promises = filteredData.map(item =>
+                        fetch(`/api/list-questions/detail/${item.list_question_id}`)
+                            .then(res => res.json())
+                            .then(detail => {
+                                return {
+                                    topic: item.topic,
+                                    list_question_id: item.list_question_id,
+                                    questions: detail.data.questions
+                                        .filter(q => q.type === questionType)
+                                        .map(q => ({
+                                            ...q,
+                                            list_question_id: item.list_question_id
+                                        }))
+                                };
+                            })
+                            .catch(error => {
+                                console.error(`Lỗi khi lấy chi tiết list_question_id ${item.list_question_id}:`, error);
+                                return { topic: item.topic, list_question_id: item.list_question_id, questions: [] };
+                            })
+                    );
+                    Promise.all(promises).then(results => {
+                        questionList.innerHTML = '';
+                        const filteredResults = topic ? results.filter(r => r.topic === topic) : results;
+                        if (filteredResults.length === 0 || filteredResults.every(r => r.questions.length === 0)) {
+                            questionList.innerHTML = '<p class="text-muted">Không có câu hỏi nào phù hợp.</p>';
+                            return;
+                        }
+                        filteredResults.forEach(result => {
+                            if (result.questions.length > 0) {
+                                const topicDiv = document.createElement('div');
+                                topicDiv.className = 'topic-group';
+                                topicDiv.innerHTML = `<h5>Chủ đề: ${result.topic}</h5>`;
+                                result.questions.forEach(q => {
+                                    const questionDiv = document.createElement('div');
+                                    questionDiv.className = 'question-item';
+                                    // Xử lý options là mảng đối tượng
+                                    const optionsHtml = q.type === 'Trắc nghiệm' && Array.isArray(q.options) && q.options.length > 0
+                                        ? `<ul>${q.options.map(o => `<li>${o.option_text || 'Không có nội dung'} ${o.is_correct ? '(Đúng)' : ''}</li>`).join('')}</ul>`
+                                        : q.type === 'Trắc nghiệm' ? '<p class="text-muted">Không có đáp án</p>' : '';
+                                    questionDiv.innerHTML = `
+                                <div class="form-check">
+                                    <input class="form-check-input question-checkbox" type="checkbox" data-id="${q.question_id}" data-list-id="${result.list_question_id}" data-type="${q.type}" id="question-${q.question_id}">
+                                    <label class="form-check-label" for="question-${q.question_id}">
+                                        <strong>${q.title || 'Không có tiêu đề'}</strong> (${q.type})<br>
+                                        ${q.content || 'Không có nội dung'}<br>
+                                        ${optionsHtml}
+                                    </label>
+                                </div>
+                            `;
+                                    topicDiv.appendChild(questionDiv);
+                                });
+                                questionList.appendChild(topicDiv);
+                            }
+                        });
+
+                        // Gắn lại sự kiện cho checkbox
+                        document.querySelectorAll('.question-checkbox').forEach(checkbox => {
+                            checkbox.removeEventListener('change', handleCheckboxChange);
+                            checkbox.addEventListener('change', handleCheckboxChange);
+                        });
+
+                        function handleCheckboxChange() {
+                            let selectedQuestions = JSON.parse(localStorage.getItem('selectedQuestions')) || [];
+                            const questionId = this.getAttribute('data-id');
+                            const listQuestionId = this.getAttribute('data-list-id');
+                            const questionType = this.getAttribute('data-type');
+                            if (!questionId || !listQuestionId || listQuestionId === 'undefined') {
+                                console.error('Invalid question data:', { questionId, listQuestionId });
+                                return;
+                            }
+                            if (this.checked) {
+                                if (!selectedQuestions.some(q => q.question_id === questionId)) {
+                                    selectedQuestions.push({ question_id: questionId, list_question_id: listQuestionId, type: questionType });
+                                }
+                            } else {
+                                selectedQuestions = selectedQuestions.filter(item => item.question_id !== questionId);
+                            }
+                            localStorage.setItem('selectedQuestions', JSON.stringify(selectedQuestions));
+                            validateQuestionTypes(selectedQuestions);
+                            renderSelectedQuestions();
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy danh sách list-questions:', error);
+                    questionList.innerHTML = '<p class="text-danger">Lỗi khi tải câu hỏi.</p>';
+                });
+        }
+
+        function validateQuestionTypes(selectedQuestions) {
+            const submitButton = document.getElementById('create_sublist_submit');
+            const errorDiv = document.getElementById('question_type_error');
+            if (selectedQuestions.length === 0) {
+                submitButton.disabled = true;
+                errorDiv.classList.add('d-none');
+                return;
+            }
+            const types = [...new Set(selectedQuestions.map(q => q.type))];
+            if (types.length > 1) {
+                errorDiv.classList.remove('d-none');
+                submitButton.disabled = true;
+            } else {
+                errorDiv.classList.add('d-none');
+                submitButton.disabled = false;
+            }
+        }
+
+        function renderSelectedQuestions() {
+            const selectedQuestions = JSON.parse(localStorage.getItem('selectedQuestions')) || [];
+            const selectedQuestionsList = document.getElementById('selected_questions_list');
+            if (selectedQuestions.length === 0) {
+                selectedQuestionsList.innerHTML = '<p class="text-muted">Chưa có câu hỏi nào được chọn.</p>';
+                return;
+            }
+            const promises = selectedQuestions.map(q =>
+                fetch(`/api/questions/getById/${q.question_id}`)
+                    .then(res => res.json())
+                    .then(data => ({
+                        ...data,
+                        list_question_id: q.list_question_id
+                    }))
                     .catch(error => {
-                        console.error("Error calling API:", error);
-                        alert("Có lỗi xảy ra: " + error.message);
+                        console.error(`Lỗi khi lấy chi tiết câu hỏi ${q.question_id}:`, error);
+                        return null;
                     })
-                    .finally(() => {
-                        startButton.disabled = false;
-                        startButton.innerHTML = 'Bắt đầu tạo bộ câu hỏi';
-                    });
+            );
+            Promise.all(promises).then(questions => {
+                selectedQuestionsList.innerHTML = questions
+                    .filter(q => q !== null)
+                    .map(q => {
+                        // Xử lý options là mảng đối tượng
+                        const optionsHtml = q.type === 'Trắc nghiệm' && Array.isArray(q.options) && q.options.length > 0
+                            ? `<ul>${q.options.map(o => `<li>${o.option_text || 'Không có nội dung'} ${o.is_correct ? '(Đúng)' : ''}</li>`).join('')}</ul>`
+                            : q.type === 'Trắc nghiệm' ? '<p class="text-muted">Không có đáp án</p>' : '';
+                        return `
+                    <div class="question-item">
+                        <strong>${q.title || 'Không có tiêu đề'}</strong> (${q.type})<br>
+                        ${q.content || 'Không có nội dung'}<br>
+                        ${optionsHtml}
+                    </div>
+                `;
+                    })
+                    .join('');
             });
-        } else {
-            console.error("Start button not found"); // Kiểm tra nếu không tìm thấy nút
         }
 
-        // Lưu câu hỏi tạm thời vào localStorage khi nhấn "Tạo Thêm Câu Hỏi"
-        if (saveQuestionButton) {
-            saveQuestionButton.addEventListener('click', function () {
-                console.log("Save button clicked"); // Kiểm tra sự kiện click
+        document.getElementById('createSublistModal').addEventListener('show.bs.modal', function () {
+            localStorage.removeItem('selectedQuestions');
+            document.getElementById('selected_questions_list').innerHTML = '<p class="text-muted">Chưa có câu hỏi nào được chọn.</p>';
+            document.getElementById('question_type_error').classList.add('d-none');
+            document.getElementById('create_sublist_submit').disabled = true;
+            console.log('Cleared selectedQuestions on modal open');
+        });
 
-                const listQuestionId = localStorage.getItem("list_question_id");
-                if (!listQuestionId) {
-                    alert("Vui lòng bắt đầu tạo bộ câu hỏi trước!");
-                    return;
-                }
+        document.getElementById('createSublistForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const title = document.getElementById('modal_sublist_title').value;
+            const questionType = document.getElementById('modal_question_type').value;
+            const isShuffle = document.getElementById('isShuffle').checked;
+            let selectedQuestions = JSON.parse(localStorage.getItem('selectedQuestions')) || [];
+            const randomInputs = document.querySelectorAll('.topic-random-input');
+            const courseId = document.getElementById('modal_course_id').value;
+            const listQuestionId = document.getElementById('modal_list_question_id').value;
 
-                const title = document.getElementById('title').value;
-                const content = document.getElementById('content').value;
-                const type = document.getElementById('type').value;
-                console.log("Form data:", { title, content, type }); // Kiểm tra dữ liệu form
-                if (!title || !content) {
-                    alert("Vui lòng nhập đầy đủ tiêu đề và nội dung câu hỏi!");
-                    return;
-                }
-                const options = [];
-                let hasCorrectAnswer = false;
-                if (type === 'Trắc nghiệm') {
-                    document.querySelectorAll('.option').forEach((optionElement, index) => {
-                        const optionText = optionElement.querySelector('input[type="text"]').value;
-                        const isCorrect = optionElement.querySelector('input[type="radio"]').checked;
-
-                        if (optionText) {
-                            options.push({ option_text: optionText, is_correct: isCorrect });
-                            if (isCorrect) hasCorrectAnswer = true;
+            // Xử lý random câu hỏi
+            for (const input of randomInputs) {
+                const topic = input.getAttribute('data-topic');
+                const count = parseInt(input.value) || 0;
+                if (count > 0) {
+                    try {
+                        const response = await fetch(`/api/list-questions/${lecturerId}?course_id=${courseId}`);
+                        const data = await response.json();
+                        let topicItems = data.filter(item => item.topic === topic);
+                        if (listQuestionId) {
+                            topicItems = topicItems.filter(item => item.list_question_id === listQuestionId);
                         }
-                    });
-                    if (options.length < 2) {
-                        alert("Câu hỏi trắc nghiệm cần ít nhất 2 lựa chọn!");
+                        for (const item of topicItems) {
+                            const detailResponse = await fetch(`/api/list-questions/detail/${item.list_question_id}`);
+                            const detail = await detailResponse.json();
+                            const filteredQuestions = detail.data.questions.filter(q => q.type === questionType);
+                            if (filteredQuestions.length < count) {
+                                alert(`Không đủ câu hỏi cho chủ đề ${topic}. Yêu cầu ${count} câu, nhưng chỉ có ${filteredQuestions.length} câu.`);
+                                return;
+                            }
+                            const shuffled = filteredQuestions.sort(() => 0.5 - Math.random());
+                            const selected = shuffled.slice(0, count).map(q => ({
+                                question_id: q.question_id,
+                                list_question_id: item.list_question_id,
+                                type: q.type
+                            }));
+                            selected.forEach(q => {
+                                if (!selectedQuestions.some(existing => existing.question_id === q.question_id)) {
+                                    selectedQuestions.push(q);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`Lỗi khi lấy câu hỏi ngẫu nhiên cho chủ đề ${topic}:`, error);
+                        alert(`Lỗi khi chọn câu hỏi ngẫu nhiên cho chủ đề ${topic}.`);
                         return;
                     }
-
-                    if (!hasCorrectAnswer) {
-                        alert("Vui lòng chọn đáp án đúng!");
-                        return;
-                    }
                 }
-                const question = { title, content, type, options };
-                let savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
-                savedQuestions.push(question);
-                localStorage.setItem('questions', JSON.stringify(savedQuestions));
-                alert("Câu hỏi đã được lưu tạm thời.");
-                resetForm();
-                renderTemporaryQuestions();
-            });
-        } else {
-            console.error("Save button not found"); // Kiểm tra nếu không tìm thấy nút
-        }
+            }
 
-        // Hoàn thành và gửi tất cả câu hỏi khi nhấn "Hoàn Thành"
-        if (finishCreatingButton) {
-            finishCreatingButton.addEventListener('click', function () {
-                console.log("Finish button clicked"); // Kiểm tra sự kiện click
-                let savedQuestions = JSON.parse(localStorage.getItem('questions')) || [];
-                console.log("Saved questions:", savedQuestions); // Kiểm tra câu hỏi đã lưu
+            // Lọc trùng lặp và loại bỏ các câu hỏi có list_question_id không hợp lệ
+            selectedQuestions = selectedQuestions.filter(
+                (q, index, self) =>
+                    q.question_id &&
+                    q.list_question_id &&
+                    q.list_question_id !== 'undefined' &&
+                    self.findIndex(item => item.question_id === q.question_id) === index
+            );
+            localStorage.setItem('selectedQuestions', JSON.stringify(selectedQuestions));
+            console.log('Final selectedQuestions:', selectedQuestions);
 
-                if (savedQuestions.length === 0) {
-                    alert("Chưa có câu hỏi nào được lưu!");
-                    return;
-                }
-                const listQuestionId = localStorage.getItem("list_question_id");
-                if (!listQuestionId) {
-                    alert("Có lỗi xảy ra! Không tìm thấy danh sách câu hỏi.");
-                    return;
-                }
-                finishCreatingButton.disabled = true;
-                finishCreatingButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
-                fetch('/api/questions/batch', {
+            // Kiểm tra loại câu hỏi trước khi gửi
+            validateQuestionTypes(selectedQuestions);
+            if (selectedQuestions.length === 0) {
+                alert('Vui lòng chọn ít nhất một câu hỏi!');
+                return;
+            }
+            if (!title) {
+                alert('Vui lòng nhập tiêu đề đề thi!');
+                return;
+            }
+            if (!questionType) {
+                alert('Vui lòng chọn loại câu hỏi!');
+                return;
+            }
+            const types = [...new Set(selectedQuestions.map(q => q.type))];
+            if (types.length > 1) {
+                alert('Không được chọn cả câu hỏi Trắc nghiệm và Tự luận trong cùng một đề thi!');
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:8000/api/sub-lists/create', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify({
-                        list_question_id: listQuestionId,
-                        questions: savedQuestions
+                        title: title,
+                        isShuffle,
+                        question_ids: selectedQuestions.map(q => q.question_id)
                     })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert("✅ Tạo mã đề thành công!");
+                    localStorage.removeItem('selectedQuestions');
+                    document.getElementById('createSublistForm').reset();
+                    document.getElementById('selected_questions_list').innerHTML = '<p class="text-muted">Chưa có câu hỏi nào được chọn.</p>';
+                    document.getElementById('create_sublist_submit').disabled = true;
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createSublistModal'));
+                    modal.hide();
+                    fetchSubLists();
+                } else {
+                    alert(`❌ Lỗi tạo mã đề: ${data.message || 'Có lỗi xảy ra.'}`);
+                }
+            } catch (err) {
+                console.error('Lỗi khi gửi yêu cầu tạo mã đề:', err);
+                alert("❌ Lỗi kết nối đến server.");
+            }
+        });
+        function fetchListQuestions(courseId = "all", topic = "all") {
+            let url = `/api/list-questions/${lecturerId}`;
+            const params = [];
+            if (courseId !== "all") params.push(`course_id=${courseId}`);
+            if (topic !== "all") params.push(`topic=${encodeURIComponent(topic)}`);
+            if (params.length > 0) url += `?${params.join('&')}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Lỗi khi lấy danh sách bộ câu hỏi');
+                    return response.json();
                 })
-                    .then(response => {
-                        console.log("Response status:", response.status); // Kiểm tra status code
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Response data:", data); // Kiểm tra dữ liệu trả về
-                        if (data.success) {
-                            localStorage.removeItem('questions');
-                            localStorage.removeItem('list_question_id');
-                            alert("Tất cả câu hỏi đã được lưu thành công!");
-                            window.location.href = '/createQuestion';
-                        } else {
-                            alert("Lỗi: " + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Lỗi:", error);
-                        alert("Có lỗi xảy ra: " + error.message);
-                    })
-                    .finally(() => {
-                        finishCreatingButton.disabled = false;
-                        finishCreatingButton.innerHTML = 'Hoàn Thành';
-                    });
-            });
-        } else {
-            console.error("Finish button not found"); // Kiểm tra nếu không tìm thấy nút
+                .then(data => {
+                    const container = document.getElementById("list-question-container");
+                    container.innerHTML = data.length > 0 ?
+                        data.map(item => `
+                    <div class="col">
+                        <div class="card h-100 shadow-sm card-hover" data-id="${item.list_question_id}">
+                            <div class="card-body">
+                                <p><strong>Môn học:</strong> ${item.course?.course_name || "Không rõ"}</p>
+                                <p><strong>Chủ đề:</strong> ${item.topic}</p>
+                                <p><small>Tạo lúc: ${new Date(item.created_at).toLocaleString()}</small></p>
+                                <a href="/lecturer/chi_tiet_bo_cau_hoi/${item.list_question_id}" class="btn btn-primary btn-sm">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') : `<p class="text-muted">Chưa có bộ câu hỏi nào.</p>`;
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy bộ câu hỏi:', error);
+                    document.getElementById("list-question-container").innerHTML = `<p class="text-danger">Lỗi khi tải dữ liệu.</p>`;
+                });
         }
-        console.log("Start button:", startButton);
-        console.log("Save button:", saveQuestionButton);
-        console.log("Finish button:", finishCreatingButton);
+        function fetchSubLists(courseId = "all") {
+            const container = document.getElementById("sublist-container");
+            container.innerHTML = "Đang tải...";
+            let url = `/api/sub-lists/by-lecturer/${lecturerId}`;
+            if (courseId !== "all") {
+                url += `?course_id=${courseId}`;
+            }
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    container.innerHTML = "";
+                    if (!data.sub_list || data.sub_list.length === 0) {
+                        container.innerHTML = `<p class="text-muted">Chưa có mã đề nào. Vui lòng tạo mã đề mới.</p>`;
+                        return;
+                    }
+                    data.sub_list.forEach(sublist => {
+                        const courseName = sublist.questions.length > 0 &&
+                            sublist.questions[0].list_question &&
+                            sublist.questions[0].list_question.course
+                            ? sublist.questions[0].list_question.course.course_name
+                            : 'Không xác định';
+                        const col = document.createElement('div');
+                        col.className = 'col';
+                        col.innerHTML = `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">${sublist.title}</h5>
+                            <p class="card-text"><strong>Môn học:</strong> ${courseName}</p>
+                            <p class="card-text"><strong>Số câu hỏi:</strong> ${sublist.questions.length}</p>
+                            <p class="card-text"><strong>Trộn câu hỏi:</strong> ${sublist.isShuffle ? 'Có' : 'Không'}</p>
+                            <p class="card-text"><strong>Ngày tạo:</strong> ${new Date(sublist.created_at).toLocaleString()}</p>
+                            <a href="/lecturer/chi_tiet_ma_de/${sublist.sub_list_id}" class="btn btn-primary btn-sm">Xem chi tiết</a>
+                        </div>
+                    </div>
+                `;
+                        container.appendChild(col);
+                    });
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy mã đề:', error);
+                    container.innerHTML = `<p class="text-danger">Lỗi khi tải dữ liệu: ${error.message}. Vui lòng thử lại.</p>`;
+                });
+        }
+        document.getElementById('courseFilter').addEventListener('change', function () {
+            fetchListQuestions(this.value);
+        });
+        document.getElementById('sublistCourseFilter').addEventListener('change', function () {
+            fetchSubLists(this.value);
+        });
+        document.getElementById('sublist-tab').addEventListener('shown.bs.tab', function () {
+            fetchSubLists(document.getElementById('sublistCourseFilter').value);
+        });
+        fetchListQuestions();
     });
-
 </script>

@@ -102,40 +102,89 @@
 
 <div class="exam-container">
     <div class="header">
-        <div class="course-info">
-            Lớp của tôi / {{ $courseName }} / <strong>{{ $examTitle }}</strong>
-        </div>
-        <div class="not-complete">{{ $examStatus }}</div>
+        <div class="course-info">Lớp của tôi / Đang tải...</div>
+        <div class="not-complete">Đang tải...</div>
     </div>
     <div class="header">
         <div>
-            <div>Môn học: <strong>{{ $courseName }}</strong></div>
-            <div>Giảng viên: <strong>{{ $teacherName }}</strong></div>
+            <div>Môn học: <strong class="course-name">Đang tải...</strong></div>
+            <div>Giảng viên: <strong class="teacher-name">Đang tải...</strong></div>
         </div>
-        <div class="status_course">{{ $completedExams }}/{{ $totalExams }}</div>
+        <div class="status_course">Đang tải...</div>
     </div>
     <div class="exam-time-info">
-        <div><strong>Start:</strong> {{ $startTime }}</div>
+        <div><strong>Start:</strong> Đang tải...</div>
         <div class="time-arrow">→</div>
-        <div><strong>End:</strong> {{ $endTime }}</div>
+        <div><strong>End:</strong> Đang tải...</div>
     </div>
-    <h2>Thi học kỳ môn {{ $examTitle }}</h2>
+    <h2>Thi học kỳ môn <span class="exam-title">Đang tải...</span></h2>
     <div class="exam-content">
         <div class="exam-instructions">
             <h3>Thông tin bài thi:</h3>
-            <p>Hình thức: {{ $examType }}</p>
-            <p>Thời gian: {{ $examDuration }} phút</p>
-            <p>{{ $examNotes }}</p>
+            <p>Hình thức: Đang tải...</p>
+            <p>Thời gian: Đang tải...</p>
+            <p>Ghi chú: Đang tải...</p>
         </div>
         <div class="exam-attachments">
             <h3>📎 TÀI LIỆU ÔN THI</h3>
-            @foreach($examMaterials as $material)
-                <button>{{ $material }}</button>
-            @endforeach
+            <p>Đang tải...</p>
         </div>
     </div>
     <div class="div_button_start">
-        <a href="{{ $examLink }}" class="start-exam">START</a>
+        <a href="#" class="start-exam">START</a>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const examId = {{ $examId }}; // ID bài kiểm tra được truyền từ Controller
+        const apiUrl = `/api/exams/${examId}`; // Sử dụng API chi tiết bài kiểm tra
+
+        // Gọi API để lấy dữ liệu bài kiểm tra
+        axios.get(apiUrl)
+            .then(response => {
+                const data = response.data;
+
+                // Cập nhật thông tin bài kiểm tra trên giao diện
+                document.querySelector('.course-info').innerHTML = `Lớp của tôi / ${data.courseName} / <strong>${data.examTitle}</strong>`;
+                document.querySelector('.not-complete').innerText = data.examStatus;
+                document.querySelector('.course-name').innerText = data.courseName;
+                document.querySelector('.teacher-name').innerText = data.teacherName;
+                document.querySelector('.status_course').innerText = `${data.completedExams}/${data.totalExams}`;
+                document.querySelector('.exam-time-info').innerHTML = `
+                    <div><strong>Start:</strong> ${data.startTime}</div>
+                    <div class="time-arrow">→</div>
+                    <div><strong>End:</strong> ${data.endTime}</div>
+                `;
+                document.querySelector('.exam-title').innerText = data.examTitle;
+                document.querySelector('.exam-instructions').innerHTML = `
+                    <h3>Thông tin bài thi:</h3>
+                    <p>Hình thức: ${data.examType}</p>
+                    <p>Thời gian: ${data.examDuration} phút</p>
+                    <p>${data.examNotes}</p>
+                `;
+
+                // Hiển thị tài liệu ôn thi (nếu có)
+                const materialsContainer = document.querySelector('.exam-attachments');
+                if (data.examMaterials && data.examMaterials.length > 0) {
+                    materialsContainer.innerHTML = '<h3>📎 TÀI LIỆU ÔN THI</h3>';
+                    data.examMaterials.forEach(material => {
+                        const materialItem = document.createElement('button');
+                        materialItem.innerText = material;
+                        materialsContainer.appendChild(materialItem);
+                    });
+                } else {
+                    materialsContainer.innerHTML = '<p>Không có tài liệu ôn thi.</p>';
+                }
+
+                // Cập nhật link bắt đầu thi
+                document.querySelector('.start-exam').setAttribute('href', data.examLink);
+            })
+            .catch(error => {
+                console.error('Error fetching exam details:', error);
+                alert('Không thể tải thông tin bài kiểm tra.');
+            });
+    });
+</script>
 @endsection

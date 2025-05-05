@@ -8,7 +8,7 @@ use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Helpers\StringHelper;
-
+use Illuminate\Support\Str;
 class ClassroomController extends Controller
 {
     /**
@@ -46,9 +46,9 @@ class ClassroomController extends Controller
             ->join('student_class', 'classroom.class_id', '=', 'student_class.class_id')
             ->join('course', 'classroom.course_id', '=', 'course.course_id')
             ->join('lecturer', 'classroom.lecturer_id', '=', 'lecturer.lecturer_id')
-            ->leftJoin('score', function($join) {
+            ->leftJoin('score', function ($join) {
                 $join->on('score.student_id', '=', 'student_class.student_id')
-                     ->on('score.course_id', '=', 'classroom.course_id');
+                    ->on('score.course_id', '=', 'classroom.course_id');
             })
             ->where('student_class.student_id', $student->student_id) // Sử dụng student_id của đối tượng sinh viên
             ->select(
@@ -80,11 +80,11 @@ class ClassroomController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'course_id'         => 'required|exists:course,course_id',
-            'lecturer_id'       => 'required|exists:lecturer,lecturer_id',
-            'class_code'        => 'required|string|max:50|unique:classroom,class_code',
+            'course_id' => 'required|exists:course,course_id',
+            'lecturer_id' => 'required|exists:lecturer,lecturer_id',
+            'class_code' => 'required|string|max:50|unique:classroom,class_code',
             'class_description' => 'nullable|string',
-            'class_duration'    => 'required|integer|min:1',
+            'class_duration' => 'required|integer|min:1',
         ]);
 
         $classroom = Classroom::create($validatedData);
@@ -102,11 +102,11 @@ class ClassroomController extends Controller
         }
 
         $validatedData = $request->validate([
-            'course_id'         => 'exists:course,course_id',
-            'lecturer_id'       => 'exists:lecturer,lecturer_id',
-            'class_code'        => 'string|max:50|unique:classroom,class_code,' . $id . ',class_id',
+            'course_id' => 'exists:course,course_id',
+            'lecturer_id' => 'exists:lecturer,lecturer_id',
+            'class_code' => 'string|max:50|unique:classroom,class_code,' . $id . ',class_id',
             'class_description' => 'nullable|string',
-            'class_duration'    => 'integer|min:1',
+            'class_duration' => 'integer|min:1',
         ]);
 
         $classroom->update($validatedData);
@@ -135,15 +135,15 @@ class ClassroomController extends Controller
         // Tìm kiếm theo từ khóa
         if ($request->has('keyword') && !empty($request->keyword)) {
             $keyword = $request->keyword;
-            $query->where(function($q) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
                 $q->where('class_code', 'LIKE', "%{$keyword}%")
-                  ->orWhere('class_description', 'LIKE', "%{$keyword}%")
-                  ->orWhereHas('course', function($q) use ($keyword) {
-                      $q->where('course_name', 'LIKE', "%{$keyword}%");
-                  })
-                  ->orWhereHas('lecturer', function($q) use ($keyword) {
-                      $q->where('fullname', 'LIKE', "%{$keyword}%");
-                  });
+                    ->orWhere('class_description', 'LIKE', "%{$keyword}%")
+                    ->orWhereHas('course', function ($q) use ($keyword) {
+                        $q->where('course_name', 'LIKE', "%{$keyword}%");
+                    })
+                    ->orWhereHas('lecturer', function ($q) use ($keyword) {
+                        $q->where('fullname', 'LIKE', "%{$keyword}%");
+                    });
             });
         }
 
@@ -161,5 +161,119 @@ class ClassroomController extends Controller
             'status' => 'success',
             'data' => $classes
         ]);
+    }
+    public function getAllLecturerTasksOfCourse($lecturerId, $courseId)
+    {
+        // 1. Kiểm tra xem giảng viên có phụ trách lớp học của môn học này không
+        $isLecturer = DB::table('classroom')
+            ->where('lecturer_id', $lecturerId)
+            ->where('course_id', $courseId)
+            ->select('classroom.class_id')
+            ->first();
+
+        if (!$isLecturer) {
+            return response()->json([
+                'message' => 'Giảng viên không phụ trách môn học này.'
+            ], 403);
+        }
+
+        // 2. Lấy list_question_id của môn học do giảng viên phụ trách
+        $listQuestionIds = DB::table('list_question')
+            ->where('course_id', $courseId)
+            ->where('lecturer_id', $lecturerId)
+            ->pluck('list_question_id');
+
+        if ($listQuestionIds->isEmpty()) {
+            return response()->json([
+                'message' => 'Không có danh sách câu hỏi nào cho môn học này.'
+            ], 404);
+        }
+
+        // 3. Lấy question_id từ list_question
+        $questionIds = DB::table('question')
+            ->whereIn('list_question_id', $listQuestionIds)
+            ->pluck('question_id');
+
+        // 4. Lấy sub_list_id từ bảng sub_list_question
+        $subListIds = DB::table('sub_list_question')
+            ->whereIn('question_id', $questionIds)
+            ->pluck('sub_list_id');
+
+        // 5. Lấy bài kiểm tra (exam)
+        $exams = DB::table('exam')
+            ->join('sub_list', 'exam.sub_list_id', '=', 'sub_list.sub_list_id')
+            ->join('sub_list_question', 'sub_list.sub_list_id', '=', 'sub_list_question.sub_list_id')
+            ->join('question', 'sub_list_question.question_id', '=', 'question.question_id')
+            ->join('list_question', 'question.list_question_id', '=', 'list_question.list_question_id')
+            ->join('course', 'list_question.course_id', '=', 'course.course_id')
+            ->whereIn('exam.sub_list_id', $subListIds)
+            ->where('list_question.lecturer_id', $lecturerId)
+            ->select(
+                'exam.exam_id',
+                'exam.sub_list_id as exam_sub_list_id',
+                'exam.title',
+                'exam.content',
+                'exam.type',
+                'exam.isSimultaneous',
+                'exam.start_time',
+                'exam.end_time',
+                'exam.status',
+                'course.course_name as course_name',
+                DB::raw('NULL as temporary_score') // Giảng viên không cần temporary_score
+            )
+            ->groupBy(
+                'exam.exam_id',
+                'exam.sub_list_id',
+                'exam.title',
+                'exam.content',
+                'exam.type',
+                'exam.isSimultaneous',
+                'exam.start_time',
+                'exam.end_time',
+                'exam.status',
+                'course.course_name'
+            )
+            ->get();
+
+        // 6. Lấy bài tập (assignment)
+        $assignments = DB::table('assignment')
+            ->join('sub_list', 'assignment.sub_list_id', '=', 'sub_list.sub_list_id')
+            ->join('sub_list_question', 'sub_list.sub_list_id', '=', 'sub_list_question.sub_list_id')
+            ->join('question', 'sub_list_question.question_id', '=', 'question.question_id')
+            ->join('list_question', 'question.list_question_id', '=', 'list_question.list_question_id')
+            ->join('course', 'list_question.course_id', '=', 'course.course_id')
+            ->whereIn('assignment.sub_list_id', $subListIds)
+            ->where('list_question.lecturer_id', $lecturerId)
+            ->select(
+                'assignment.assignment_id',
+                'assignment.sub_list_id as assignment_sub_list_id',
+                'assignment.title',
+                'assignment.content',
+                'assignment.type',
+                'assignment.isSimultaneous',
+                'assignment.start_time',
+                'assignment.end_time',
+                'assignment.status',
+                'course.course_name',
+                DB::raw('NULL as temporary_score') // Giảng viên không cần temporary_score
+            )
+            ->groupBy(
+                'assignment.assignment_id',
+                'assignment.sub_list_id',
+                'assignment.title',
+                'assignment.content',
+                'assignment.type',
+                'assignment.isSimultaneous',
+                'assignment.start_time',
+                'assignment.end_time',
+                'assignment.status',
+                'course.course_name'
+            )
+            ->get();
+
+        return response()->json([
+            'exams' => $exams,
+            'assignments' => $assignments
+        ], 200);
     }
 }

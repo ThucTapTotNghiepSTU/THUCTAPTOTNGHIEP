@@ -15,10 +15,10 @@ class SubList extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'list_question_id',
         'sub_list_id',
         'title',
         'isShuffle',
-        'list_question_id',
     ];
 
     public $timestamps = true;

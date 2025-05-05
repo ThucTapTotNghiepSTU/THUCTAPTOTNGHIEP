@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LecturerDashboardController;
 use App\Http\Controllers\LecturerStudentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SubListController;
+use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\MyClassController;
@@ -18,16 +20,22 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\StudentAssignmentController;
-use App\Http\Controllers\StudentTaskController;
+use App\Http\Controllers\GradingController;
+use App\Http\Controllers\ClassroomViewController;
+ use App\Http\Controllers\StudentTaskController;
 
 // ========== ROUTE CÔNG KHAI ==========
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/classDetail', function () {
-    return view('show_class');
-});
+Route::get('/', function () {
+    if (Auth::check()) {
+        if (Auth::user()->lecturer_id) {
+            return redirect()->route('homeLecturer');
+        } elseif (Auth::user()->student_id) {
+            return redirect()->route('homeLoggedIn');
+        }
+    }
+    return view('welcome'); // hoặc trang landing page chung cho chưa đăng nhập
+})->name('home');
 Route::get('/submission/show', [SubmissionController::class, 'show'])->name('submissions.show');
-Route::get('/getCourseOfStudent/{student_id}', [CourseController::class, 'showCourseOfStudent'])->name('showCourseOfStudent');
-
 // ========== ROUTE CHO GUEST ==========
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('Showlogin');
@@ -107,6 +115,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/submissions', [SubmissionController::class, 'index'])->name('submissions.index');
     Route::get('/submissions/{submission}', [SubmissionController::class, 'show'])->name('submissions.show');
     Route::post('/submissions/{submission}/grade', [SubmissionController::class, 'grade'])->name('submissions.grade');
+
+    // Grading routes
+    Route::post('/submissions/{submission_id}/grade', [GradingController::class, 'gradeSubmission'])->name('submissions.grade');
+    Route::post('/submissions/{submission_id}/manual-grade', [GradingController::class, 'updateManualGrades'])->name('submissions.manual-grade');
     // làm bài
 
     Route::get('/task/start', [StudentTaskController::class, 'redirectToProperPage']);
@@ -118,6 +130,10 @@ Route::middleware('auth')->group(function () {
         return view('quiz');
     })->name('quiz.page');
 
+    Route::get('/classDetail', function () {
+        return view('show_class');
+    });
+    Route::get('/getCourseOfStudent/{student_id}', [CourseController::class, 'showCourseOfStudent'])->name('showCourseOfStudent');
 });
 
 // ========== ROUTE DÀNH RIÊNG CHO GIẢNG VIÊN ==========
@@ -133,13 +149,24 @@ Route::middleware('auth:lecturer')->group(function () {
         return view('lecturerViews.tai_khoan');
     })->name('accountLecturer');
     Route::put('/updateInfo/{id}', [LecturerController::class, 'update'])->name('updateInfo');
+    Route::get('/lecturer/chi_tiet_ma_de/{sub_list_id}', [SubListController::class, 'show'])->middleware('auth');
+    //Route liên quan đến câu hỏi
+    Route::get('/createQuestion', [ListQuestionController::class, 'index'])->name('createQuestion');
+    Route::get('/exam/detail', function (Illuminate\Http\Request $request) {
+        $examId = $request->query('exam_id');
+        return view('lecturer.exam_detail', ['examId' => $examId]);
+    });
+    Route::get('/assignment/detail', function (Illuminate\Http\Request $request) {
+        $assignmentId = $request->query('assignment_id');
+        return view('lecturer.assignment_detail', ['assignmentId' => $assignmentId]);
+    });
 });
 
 // ========== ROUTE PHỤ: DÙNG NỘI BỘ ==========
 Route::get('/submissions/list/{type}/{target_id}', [StudentAssignmentController::class, 'listSubmissions'])->name('submissions.list');
-
 Route::prefix('lecturer')->group(function () {
     Route::get('/dashboard', [LecturerDashboardController::class, 'index'])->name('lecturer.dashboard');
     Route::get('/exams/{examId}', [LecturerDashboardController::class, 'examDetail'])->name('lecturer.exam.detail');
     Route::get('/assignments/{assignmentId}', [LecturerDashboardController::class, 'assignmentDetail'])->name('lecturer.assignment.detail');
 });
+Route::get('/view/classroom', [ClassroomViewController::class, 'show'])->name('lecturer.classroom.show');

@@ -4,9 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Support\Str;
-
 
 class Assignment extends Model
 {
@@ -19,24 +17,17 @@ class Assignment extends Model
 
     protected $fillable = [
         'assignment_id',
-        'sub_list_id',  // Khóa phụ
+        'sub_list_id',
         'title',
         'content',
         'type',
         'isSimultaneous',
+        'show_result',
         'start_time',
         'end_time',
-        'show_result',
         'status',
-        'created_by'
     ];
 
-    protected $casts = [
-        'isSimultaneous' => 'boolean',
-        'show_result' => 'boolean',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
-    ];
     public $timestamps = true;
 
     protected static function boot()
@@ -44,7 +35,9 @@ class Assignment extends Model
         parent::boot();
 
         static::creating(function ($assignment) {
-            $assignment->assignment_id = (string) Str::uuid();
+            if (!$assignment->assignment_id) {
+                $assignment->assignment_id = (string) Str::uuid();
+            }
         });
     }
 
@@ -53,35 +46,16 @@ class Assignment extends Model
         return ['Pending', 'Processing', 'Completed'];
     }
 
-    // Danh sách kiểu bài thi hợp lệ
     public static function getAllowedTypes()
     {
         return ['Trắc nghiệm', 'Tự luận'];
     }
-
-    // Quan hệ với Course
-    public function sublist()
+    public function subList()
     {
         return $this->belongsTo(SubList::class, 'sub_list_id');
     }
-    public function course()
-    {
-        return $this->belongsTo(Course::class, 'course_id'); // 'course_id' là tên cột khoá ngoại liên kết đến bảng 'course'
-    }
-
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function classes()
-    {
-        return $this->belongsToMany(ClassModel::class, 'assignment_class');
-    }
-
     public function submissions()
     {
         return $this->hasMany(Submission::class);
     }
-    
 }

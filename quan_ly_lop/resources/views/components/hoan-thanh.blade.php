@@ -141,4 +141,42 @@
         <a href="{{ $homeLink }}" class="btn-home">VỀ TRANG CHỦ</a>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const examId = {{ $examId }}; // ID bài kiểm tra được truyền từ Controller
+        const apiUrl = `/api/exams/${examId}`; // API chi tiết bài kiểm tra
+
+        // Gọi API để lấy dữ liệu bài kiểm tra
+        axios.get(apiUrl)
+            .then(response => {
+                const data = response.data;
+
+                // Cập nhật thông tin bài kiểm tra trên giao diện
+                document.querySelector('.course-info').innerHTML = `Lớp của tôi / ${data.courseName} / <strong>${data.examTitle}</strong>`;
+                document.querySelector('.completed').innerText = 'ĐÃ HOÀN THÀNH';
+                document.querySelector('.status_course').innerText = `${data.completedExams}/${data.totalExams}`;
+                document.querySelector('.exam-result').innerHTML = `
+                    <h2>BẠN ĐÃ HOÀN THÀNH BÀI KIỂM TRA</h2>
+                    <p>Điểm tạm thời: <strong>${data.examScore}/10</strong></p>
+                `;
+                document.querySelector('.time-details').innerHTML = `
+                    <div class="time-item">
+                        ⏳ Thời gian làm bài: <span class="time-value">${data.examTime}</span>
+                    </div>
+                    <div class="time-item">
+                        🕒 Thời gian hoàn thành: <span class="time-value">${data.completionTime}</span>
+                    </div>
+                `;
+
+                // Cập nhật link về trang chủ
+                document.querySelector('.btn-home').setAttribute('href', data.homeLink);
+            })
+            .catch(error => {
+                console.error('Error fetching exam details:', error);
+                alert('Không thể tải thông tin bài kiểm tra.');
+            });
+    });
+</script>
 @endsection
